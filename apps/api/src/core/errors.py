@@ -1,0 +1,40 @@
+from fastapi import Request
+from fastapi.responses import JSONResponse
+import uuid
+
+
+class ConnectAPIException(Exception):
+    def __init__(self, code: str, message: str, status_code: int = 400):
+        self.code = code
+        self.message = message
+        self.status_code = status_code
+        super().__init__(message)
+
+
+class PermissionDeniedException(ConnectAPIException):
+    def __init__(self, message: str = "You do not have permission to perform this action."):
+        super().__init__(code="PERMISSION_DENIED", message=message, status_code=403)
+
+
+class NotFoundException(ConnectAPIException):
+    def __init__(self, message: str = "The requested resource was not found."):
+        super().__init__(code="NOT_FOUND", message=message, status_code=404)
+
+
+class UnauthorizedException(ConnectAPIException):
+    def __init__(self, message: str = "Authentication required."):
+        super().__init__(code="UNAUTHORIZED", message=message, status_code=401)
+
+
+async def connect_exception_handler(request: Request, exc: ConnectAPIException) -> JSONResponse:
+    request_id = getattr(request.state, "request_id", f"req_{uuid.uuid4().hex[:12]}")
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={
+            "error": {
+                "code": exc.code,
+                "message": exc.message,
+                "request_id": request_id,
+            }
+        },
+    )
