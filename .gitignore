@@ -69,3 +69,7 @@ yarn-error.log*
 pnpm-debug.log*
 # TypeScript build info
 *.tsbuildinfo
+
+# Supabase CLI temp cache
+supabase/.temp/
+.temp/
