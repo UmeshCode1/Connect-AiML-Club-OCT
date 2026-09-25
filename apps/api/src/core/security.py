@@ -56,10 +56,27 @@ def get_current_user(
             email="admin@aimlcluboct.in",
             role="CLUB_ADMIN",
             permissions=[
-                "events.view", "events.create", "events.update", "events.publish",
-                "participants.view", "participants.create", "participants.import",
-                "certificates.view", "certificates.generate", "certificates.issue",
-                "chronicle.*", "journey.*", "projects.*"
+                "events.view",
+                "events.create",
+                "events.update",
+                "events.delete",
+                "events.publish",
+                "events.*",
+                "participants.view",
+                "participants.create",
+                "participants.update",
+                "participants.delete",
+                "participants.import",
+                "participants.*",
+                "attendance.*",
+                "certificates.view",
+                "certificates.generate",
+                "certificates.issue",
+                "certificates.*",
+                "media.*",
+                "chronicle.*",
+                "journey.*",
+                "projects.*"
             ],
             event_scopes=["GLOBAL"],
         )
@@ -97,3 +114,18 @@ def require_permission(action: str):
             return user
         raise PermissionDeniedException(f"Permission denied for action: '{action}'")
     return permission_checker
+
+
+def get_optional_current_user(
+    authorization: Optional[str] = Header(None)
+) -> Optional[AuthenticatedUser]:
+    """
+    Optional authentication dependency for endpoints accessible to both public visitors and authenticated staff.
+    """
+    if not authorization or not authorization.startswith("Bearer "):
+        return None
+    try:
+        return get_current_user(authorization=authorization)
+    except Exception:
+        return None
+

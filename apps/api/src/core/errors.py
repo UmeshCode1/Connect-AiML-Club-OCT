@@ -61,7 +61,16 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
 
 async def http_exception_handler(request: Request, exc: StarletteHTTPException) -> JSONResponse:
     request_id = getattr(request.state, "request_id", f"req_{uuid.uuid4().hex[:12]}")
-    code = "NOT_FOUND" if exc.status_code == 404 else "HTTP_ERROR"
+    code_map = {
+        400: "BAD_REQUEST",
+        401: "UNAUTHORIZED",
+        403: "PERMISSION_DENIED",
+        404: "NOT_FOUND",
+        409: "CONFLICT",
+        422: "VALIDATION_ERROR",
+        500: "INTERNAL_SERVER_ERROR",
+    }
+    code = code_map.get(exc.status_code, "HTTP_ERROR")
     return JSONResponse(
         status_code=exc.status_code,
         content={
@@ -72,3 +81,4 @@ async def http_exception_handler(request: Request, exc: StarletteHTTPException) 
             }
         },
     )
+

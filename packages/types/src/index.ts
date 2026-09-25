@@ -128,6 +128,17 @@ export type ResourceVisibility =
   | 'ADMIN_ONLY'
   | 'HIDDEN';
 
+export type EventType =
+  | 'WORKSHOP'
+  | 'HACKATHON'
+  | 'BOOTCAMP'
+  | 'SEMINAR'
+  | 'CONFERENCE'
+  | 'COMPETITION'
+  | 'WEBINAR'
+  | 'MEETUP'
+  | 'INTERNAL';
+
 export interface Event {
   id: string; // uuid
   event_code: string; // e.g. EVT-APTIFY-2026
@@ -135,7 +146,7 @@ export interface Event {
   title: string;
   short_description?: string;
   description?: string;
-  event_type?: string;
+  event_type?: EventType | string;
   status: EventStatus;
   visibility: ResourceVisibility;
   cover_media_id?: string;
@@ -149,6 +160,24 @@ export interface Event {
   created_by?: string;
   created_at: string;
   updated_at: string;
+}
+
+export interface EventLifecycleTransition {
+  from_status: EventStatus;
+  to_status: EventStatus;
+  reason?: string;
+  changed_by?: string;
+  timestamp: string;
+}
+
+export interface EventAnalytics {
+  total_registrations: number;
+  confirmed_count: number;
+  waitlisted_count: number;
+  cancelled_count: number;
+  attended_count: number;
+  capacity: number | null;
+  capacity_percentage: number | null;
 }
 
 // -----------------------------------------------------------------------------
@@ -166,10 +195,12 @@ export type RegistrationSource =
 
 export type RegistrationStatus =
   | 'REGISTERED'
+  | 'CONFIRMED'
   | 'WAITLISTED'
   | 'CANCELLED'
   | 'REJECTED'
   | 'WALK_IN'
+  | 'ATTENDED'
   | 'COMPLETED';
 
 export interface EventParticipation {
@@ -187,6 +218,22 @@ export interface EventParticipation {
   created_at: string;
   updated_at: string;
 }
+
+export interface EventRegistrationInput {
+  student_id?: string;
+  full_name: string;
+  enrollment_number: string;
+  email: string;
+  phone?: string;
+  department?: string;
+  course?: string;
+  batch?: string;
+  semester?: string;
+  source?: RegistrationSource;
+  team_name?: string;
+  notes?: string;
+}
+
 
 export type AttendanceStatus = 'PRESENT' | 'ABSENT' | 'EXCUSED' | 'LATE' | 'LEFT_EARLY';
 
