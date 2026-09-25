@@ -7,6 +7,7 @@ from apps.api.src.api.v1.endpoints import (
     sessions,
     attendance,
     volunteers,
+    media,
 )
 
 api_router = APIRouter()
@@ -18,4 +19,6 @@ api_router.include_router(certificates.router)
 api_router.include_router(sessions.router)
 api_router.include_router(attendance.router)
 api_router.include_router(volunteers.router)
+api_router.include_router(media.router)
+
 

@@ -28,6 +28,17 @@ class UnauthorizedException(ConnectAPIException):
         super().__init__(code="UNAUTHORIZED", message=message, status_code=401)
 
 
+class BadRequestException(ConnectAPIException):
+    def __init__(self, message: str = "Invalid request payload."):
+        super().__init__(code="BAD_REQUEST", message=message, status_code=400)
+
+
+class ConflictException(ConnectAPIException):
+    def __init__(self, message: str = "Resource conflict occurred."):
+        super().__init__(code="CONFLICT", message=message, status_code=409)
+
+
+
 async def connect_exception_handler(request: Request, exc: ConnectAPIException) -> JSONResponse:
     request_id = getattr(request.state, "request_id", f"req_{uuid.uuid4().hex[:12]}")
     return JSONResponse(
