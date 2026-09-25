@@ -342,3 +342,158 @@ def test_full_migration_chain_integrity():
     assert "user_roles" not in content
     assert "roles r" not in content
 
+
+# ==============================================================================
+# 5. Post-Release Audit Regression Tests (DEF-01, DEF-02, DEF-03)
+# ==============================================================================
+
+def test_chronicle_scheduled_privacy_leak_prevented():
+    """
+    DEF-01 Regression:
+    Ensure that a future scheduled publication (status=PUBLISHED, scheduled_at > now)
+    does not leak to anonymous/public callers via list or slug endpoints.
+    """
+    future_iso = "2099-01-01T00:00:00Z"
+    payload = {
+        "title": "Future AI Breakthroughs at OCT 2099",
+        "slug": "future-ai-breakthroughs-2099",
+        "edition_type": "GENERAL",
+        "excerpt": "A glimpse into AI research decades ahead.",
+        "content": "# Research from 2099",
+        "visibility": "PUBLIC",
+        "scheduled_at": future_iso,
+    }
+    create_res = client.post("/v1/chronicle", json=payload, headers=CONTENT_AUTH)
+    assert create_res.status_code == 201
+    entry_id = create_res.json()["data"]["id"]
+
+    # Submit for review
+    client.post(f"/v1/chronicle/{entry_id}/submit-review", headers=CONTENT_AUTH)
+    # Approve as admin -> status becomes SCHEDULED because scheduled_at is in the future
+    app_res = client.post(f"/v1/chronicle/{entry_id}/approve", headers=ADMIN_AUTH)
+    assert app_res.status_code == 200
+    assert app_res.json()["data"]["status"] == "SCHEDULED"
+
+    # Public cannot view by slug
+    pub_slug_res = client.get("/v1/chronicle/future-ai-breakthroughs-2099")
+    assert pub_slug_res.status_code == 404
+
+    # Public list does not include future scheduled item
+    pub_list_res = client.get("/v1/chronicle")
+    assert pub_list_res.status_code == 200
+    slugs = [item["slug"] for item in pub_list_res.json()["data"]]
+    assert "future-ai-breakthroughs-2099" not in slugs
+
+    # Admin CAN view scheduled entry
+    admin_view_res = client.get(
+        "/v1/chronicle/future-ai-breakthroughs-2099",
+        headers=ADMIN_AUTH,
+    )
+    assert admin_view_res.status_code == 200
+    assert admin_view_res.json()["data"]["status"] == "SCHEDULED"
+
+
+def test_journey_external_link_scheme_validation():
+    """
+    DEF-02 Regression:
+    Ensure journey external_link rejects unsafe non-http(s) schemes like javascript:.
+    """
+    # Malicious javascript: URI must be rejected
+    unsafe_payload = {
+        "title": "Unsafe Milestone Attempt",
+        "milestone_date": "2026-05-01",
+        "milestone_type": "ACHIEVEMENT",
+        "description": "Attempting script execution via external link",
+        "external_link": "javascript:alert(document.cookie)",
+        "visibility": "PUBLIC",
+    }
+    unsafe_res = client.post("/v1/journey", json=unsafe_payload, headers=ADMIN_AUTH)
+    assert unsafe_res.status_code == 422
+
+    # Malicious data: URI must also be rejected
+    data_payload = {
+        "title": "Unsafe Data URI Milestone",
+        "milestone_date": "2026-05-01",
+        "milestone_type": "ACHIEVEMENT",
+        "description": "Attempting data URI injection",
+        "external_link": "data:text/html,<script>alert(1)</script>",
+        "visibility": "PUBLIC",
+    }
+    data_res = client.post("/v1/journey", json=data_payload, headers=ADMIN_AUTH)
+    assert data_res.status_code == 422
+
+    # Safe HTTPS URL must succeed
+    safe_payload = {
+        "title": "Safe Verified Documentation Milestone",
+        "milestone_date": "2026-05-01",
+        "milestone_type": "ACHIEVEMENT",
+        "description": "Official documentation link",
+        "external_link": "https://aimlcluboct.in/docs",
+        "visibility": "PUBLIC",
+    }
+    safe_res = client.post("/v1/journey", json=safe_payload, headers=ADMIN_AUTH)
+    assert safe_res.status_code == 201
+    assert safe_res.json()["data"]["external_link"] == "https://aimlcluboct.in/docs"
+
+
+def test_feedback_registered_student_name_attribution():
+    """
+    DEF-03 Regression:
+    Ensure student's registered full name takes precedence over username fallback.
+    """
+    # 1. Create a fresh event and transition through lifecycle to REGISTRATION_OPEN
+    ev_res = client.post(
+        "/v1/events",
+        json={
+            "title": "Feedback Name Regression Workshop",
+            "slug": "feedback-name-regression-workshop",
+            "event_type": "WORKSHOP",
+            "capacity": 100,
+        },
+        headers=ADMIN_AUTH,
+    )
+    assert ev_res.status_code == 201
+    event_id = ev_res.json()["data"]["id"]
+
+    # DRAFT -> PLANNING
+    client.post(
+        f"/v1/events/{event_id}/transition",
+        json={"to_status": "PLANNING"},
+        headers=ADMIN_AUTH,
+    )
+    # PLANNING -> REGISTRATION_OPEN
+    open_res = client.post(
+        f"/v1/events/{event_id}/transition",
+        json={"to_status": "REGISTRATION_OPEN"},
+        headers=ADMIN_AUTH,
+    )
+    assert open_res.status_code == 200
+
+    # 2. Register participant with email matching student token (student@aimlcluboct.in)
+    reg_payload = {
+        "full_name": "Aarav Sharma",
+        "enrollment_number": "0126AL221045",
+        "email": "student@aimlcluboct.in",
+    }
+    part_res = client.post(f"/v1/events/{event_id}/participants", json=reg_payload)
+    assert part_res.status_code == 201
+
+    # 3. Submit feedback as dev-student-token
+    fb_payload = {
+        "rating": 5,
+        "feedback_text": "Exceptional hands-on learning experience with deep architectures!",
+        "suggestion_text": "More GPU compute time would be awesome.",
+        "publication_consent": "PUBLIC_NAME",
+    }
+    fb_res = client.post(
+        f"/v1/events/{event_id}/feedback",
+        json=fb_payload,
+        headers=STUDENT_AUTH,
+    )
+    assert fb_res.status_code == 201
+    fb_data = fb_res.json()["data"]
+    assert fb_data["publication_consent"] == "PUBLIC_NAME"
+    assert fb_data["student_name"] == "Aarav Sharma"
+    assert not fb_data["is_anonymous"]
+
+
