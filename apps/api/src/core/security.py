@@ -13,6 +13,28 @@ class AuthenticatedUser(BaseModel):
     event_scopes: List[str] = []
 
 
+def check_permission_match(required_action: str, granted_permissions: List[str]) -> bool:
+    """
+    Checks if required_action is granted.
+    Supports:
+    - Global wildcard: '*'
+    - Module wildcard: 'module.*' (e.g. 'chronicle.*' covers 'chronicle.create')
+    - Exact match: 'events.view'
+    """
+    if "*" in granted_permissions:
+        return True
+    if required_action in granted_permissions:
+        return True
+    
+    parts = required_action.split(".")
+    if len(parts) == 2:
+        module = parts[0]
+        if f"{module}.*" in granted_permissions:
+            return True
+            
+    return False
+
+
 def get_current_user(
     authorization: Optional[str] = Header(None)
 ) -> AuthenticatedUser:
@@ -26,14 +48,37 @@ def get_current_user(
     
     token = authorization.split(" ")[1]
     
-    # Development test token bypass
+    # Development test tokens for testing authorization tiers
     if token == "dev-admin-token":
         return AuthenticatedUser(
             account_id="00000000-0000-0000-0000-000000000001",
             auth_user_id="auth-admin-uuid",
             email="admin@aimlcluboct.in",
             role="CLUB_ADMIN",
-            permissions=["events.view", "events.create", "events.update", "certificates.view"],
+            permissions=[
+                "events.view", "events.create", "events.update", "events.publish",
+                "participants.view", "participants.create", "participants.import",
+                "certificates.view", "certificates.generate", "certificates.issue",
+                "chronicle.*", "journey.*", "projects.*"
+            ],
+            event_scopes=["GLOBAL"],
+        )
+    elif token == "dev-viewer-token":
+        return AuthenticatedUser(
+            account_id="00000000-0000-0000-0000-000000000002",
+            auth_user_id="auth-viewer-uuid",
+            email="viewer@aimlcluboct.in",
+            role="VIEWER",
+            permissions=["events.view"],
+            event_scopes=["SELF"],
+        )
+    elif token == "dev-super-token":
+        return AuthenticatedUser(
+            account_id="00000000-0000-0000-0000-000000000000",
+            auth_user_id="auth-super-uuid",
+            email="superadmin@aimlcluboct.in",
+            role="SUPER_ADMIN",
+            permissions=["*"],
             event_scopes=["GLOBAL"],
         )
     
@@ -48,7 +93,7 @@ def require_permission(action: str):
     def permission_checker(user: AuthenticatedUser = Depends(get_current_user)) -> AuthenticatedUser:
         if user.role == "SUPER_ADMIN":
             return user
-        if action in user.permissions:
+        if check_permission_match(action, user.permissions):
             return user
         raise PermissionDeniedException(f"Permission denied for action: '{action}'")
     return permission_checker
