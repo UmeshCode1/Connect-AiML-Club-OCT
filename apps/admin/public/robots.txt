@@ -1,0 +1,4 @@
+# AIML Club OCT — Connect Admin
+# Disallow search engine crawlers from entire administrative subdomain
+User-agent: *
+Disallow: /

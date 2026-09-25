@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import '../../../../apps/web/src/app/globals.css';
+import './globals.css';
 import { BRAND } from '@connect/config';
 
 export const metadata: Metadata = {
