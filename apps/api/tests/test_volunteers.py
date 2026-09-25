@@ -78,3 +78,49 @@ def test_remove_volunteer_assignment():
     )
     assert del_res.status_code == 200
     assert del_res.json()["data"]["status"] == "CANCELLED"
+
+
+def test_assign_volunteer_duplicate_prevention():
+    """
+    Validates that assigning the same volunteer to an event multiple times
+    is rejected with a 409 Conflict error, enforcing uniqueness.
+    """
+    payload = {
+        "enrollment_number": "0126AL221088",
+        "student_name": "Rohan Sharma",
+        "role": "REGISTRATION",
+    }
+    # First assignment succeeds
+    res1 = client.post(
+        f"/v1/events/{EVENT_ID}/volunteers",
+        json=payload,
+        headers={"Authorization": "Bearer dev-admin-token"},
+    )
+    assert res1.status_code == 201
+
+    # Second assignment with duplicate enrollment for same event is rejected
+    res2 = client.post(
+        f"/v1/events/{EVENT_ID}/volunteers",
+        json=payload,
+        headers={"Authorization": "Bearer dev-admin-token"},
+    )
+    assert res2.status_code == 409
+    assert "already assigned" in res2.json()["error"]["message"]
+
+
+def test_volunteer_assignments_unique_constraint_migration():
+    """
+    Verifies that migration 20260925000008_volunteer_assignments_constraint.sql
+    enforces the canonical uq_event_volunteer_session_role unique constraint.
+    """
+    import os
+    migrations_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../supabase/migrations"))
+    m8_path = os.path.join(migrations_dir, "20260925000008_volunteer_assignments_constraint.sql")
+    assert os.path.isfile(m8_path), "Migration 000008 file must exist"
+
+    with open(m8_path, "r", encoding="utf-8") as f:
+        content = f.read()
+
+    assert "uq_event_volunteer_session_role" in content
+    assert "UNIQUE (event_id, student_id, session_id, role)" in content
+
