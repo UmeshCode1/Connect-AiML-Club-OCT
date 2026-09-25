@@ -178,6 +178,10 @@ export default function PublicEventDetailPage({ params }: { params: Promise<{ sl
               Already registered?{' '}
               <Link href={`/events/${event.slug}/pass`} style={{ color: 'var(--color-brand-primary, #014B7A)', fontWeight: 600, textDecoration: 'underline' }}>
                 Access your Digital Attendance Pass →
+              </Link>{' '}
+              •{' '}
+              <Link href={`/events/${event.slug}/photos`} style={{ color: 'var(--color-brand-primary, #014B7A)', fontWeight: 600, textDecoration: 'underline' }}>
+                Discover Event Photos →
               </Link>
             </p>
           </div>
