@@ -147,26 +147,90 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=[YOUR-SUPABASE-ANON-KEY]
 
 ---
 
-## 8. Final Verdict
+## 8. Post-Deployment Schema Integrity Audit
 
-### **PRODUCTION READY**
+### 8.1. Actual Supabase Project Identity
+- **Project Name**: `Connect-AiML-Club-OCT`
+- **Project Ref**: `sslkenwxjqwwzcgafghm`
+- **Region**: `ap-southeast-1`
+- **Database Version**: PostgreSQL 17.6 (aarch64)
+- **Status**: `ACTIVE_HEALTHY`
+- **Linked**: `true`
+- **Project Mapping**: The cloud dashboard display name `Connect-AiML-Club-OCT` corresponds to the local `supabase/config.toml` identifier `connect-aiml-club-oct`, linked via authoritative project ref `sslkenwxjqwwzcgafghm`.
+
+### 8.2. Migration State & History
+- All 7 migrations (`20260925000001` through `20260925000007`) are confirmed applied to the remote database (`remote = local`).
+- Migration state is clean with zero conflicted or unknown versions in `supabase_migrations.schema_migrations`.
+
+### 8.3. Database Freshness & Data Safety Assessment
+- **Creation Timestamp**: `2026-09-25T09:06:09.989421Z` (provisioned today).
+- **Pre-Migration State**: Completely empty cloud instance with zero historical application data.
+- **Current Live Data Counts**: All 28 user tables contain exactly `0` rows.
+- **Safety Verdict**: Zero data loss, zero overwritten data. Production data safety is 100% verified.
+
+### 8.4. Legacy `roles` and `user_roles` Assessment
+- **Status**: Tables exist as empty compatibility artifacts (0 rows).
+- **Dependencies**:
+  - Foreign keys: Only `user_roles.role_id -> roles.id`. No other table references them.
+  - Active RLS Policies: **Zero**. None of the active policies on any live table reference `roles` or `user_roles`.
+  - Functions: **Zero**. No function references `roles` or `user_roles`.
+  - Views / Triggers: **Zero**. No view or custom trigger references them.
+  - Application Code: **Zero**. No backend service or frontend component queries them.
+- **Origin**: Required exclusively by immutable historical migrations `000002` and `000003` to allow policy compilation during replay on a clean database before migration `000006` permanently superseded and dropped those policies.
+- **Classification**: Harmless, unused compatibility artifacts. They do not conflict with or compromise canonical RBAC.
+
+### 8.5. Canonical RBAC Status
+- **Core Entities**: `team_roles`, `team_memberships`, `accounts`, `student_profiles` all exist with expected columns, foreign keys, and indexes.
+- **Canonical Helper**: `public.check_user_has_role(VARIADIC allowed_roles text[])`:
+  - `SECURITY DEFINER`: `true`
+  - `search_path`: Strictly pinned to `public, pg_temp`
+  - Execution Grants: `authenticated`, `service_role`, `postgres`. Access is strictly revoked from `public` and `anon`.
+- **Secondary Helper**: `public.check_user_is_event_volunteer(target_event_id uuid, required_role text)`:
+  - `SECURITY DEFINER`: `true`
+  - `search_path`: Strictly pinned to `public, pg_temp`
+  - Execution Grants: `authenticated`, `service_role`, `postgres`. Access strictly revoked from `public` and `anon`.
+
+### 8.6. `volunteer_assignments` Schema Verification
+- **Status**: Live table exists with `rowsecurity = true`.
+- **Columns**: `id`, `event_id`, `session_id`, `student_id`, `role`, `status`, `assigned_by`, `created_at`, `updated_at`.
+- **Foreign Keys**:
+  - `event_id -> events(id) ON DELETE CASCADE`
+  - `session_id -> event_sessions(id) ON DELETE SET NULL`
+  - `student_id -> student_profiles(id) ON DELETE RESTRICT`
+  - `assigned_by -> accounts(id) ON DELETE SET NULL`
+- **Indexes**: All 4 operational indexes (`idx_volunteer_event_role`, `idx_volunteer_student`, `idx_volunteer_session`, `idx_volunteer_status`) exist.
+- **RLS Policies**: Reconciled to `check_user_has_role(...)` and volunteer assignment ownership.
+- **Schema Discrepancy**: The table was pre-created to satisfy migration `000003` prerequisites before migration `000006` ran. As a result, the inline constraint `uq_event_volunteer_session_role UNIQUE (event_id, student_id, session_id, role)` defined in `000006` was skipped by the `IF NOT EXISTS` clause. This constraint should be added in a planned migration.
+
+### 8.7. `uuid_generate_v4` Function Verification
+- **Status**: `public.uuid_generate_v4()` exists alongside `extensions.uuid_generate_v4()`.
+- **Definition**: Direct SQL proxy returning `SELECT extensions.uuid_generate_v4();`.
+- **Reason**: Supabase session execution paths during migration playback default `search_path` to `public` without `extensions`. The proxy function guarantees that unqualified `DEFAULT uuid_generate_v4()` references in migrations 000001–000007 resolve safely.
+- **Classification**: Completely safe, non-divergent compatibility utility.
+
+### 8.8. RLS and Security Evaluation
+- All 28 tables in `public` have `rowsecurity = true`.
+- Zero permissive `USING (true)` policies exist for public access.
+- Feedback privacy tiers (`NO`, `ANONYMOUS`, `PUBLIC_NAME`) and Chronicle temporal isolation (`scheduled_at <= now()`) are strictly enforced at the RLS policy layer.
+
+### 8.9. Application Compatibility & Regression Suite
+- **Pytest**: 98 passed, 0 failed (1.26s).
+- **Typecheck**: 0 errors across 5 monorepo workspaces.
+- **Admin Build**: Next.js 15.5.26 production build successful (8 pages).
+- **Web Build**: Next.js 15.5.26 production build successful (9 pages).
+
+---
+
+## 9. Final Verdict
+
+### **READY WITH ISSUES**
 
 **Justification**:
-- Supabase authentication verified.
-- Target production project verified: `Connect-AiML-Club-OCT` (`sslkenwxjqwwzcgafghm`, local `connect-aiml-club-oct`).
-- Migration `000007` applied to live production database.
-- Migration state is clean and synchronized across local and remote instances.
-- All four Phase 6.1 tables (`chronicle_entries`, `event_chronicle_items`, `journey_milestones`, `feedback`) exist in live production.
-- Row Level Security (`rowsecurity = true`) verified enabled on all four tables.
-- Canonical RBAC policies verified active using `public.check_user_has_role(...)`.
-- Feedback privacy tiers (`NO`, `ANONYMOUS`, `PUBLIC_NAME`) verified in RLS and service layers.
-- Chronicle temporal isolation (`scheduled_at <= now()`) verified in RLS and service layers.
-- Journey external URL security scheme validation (`^https?://`) verified.
-- Zero critical security, privacy, or architectural defects found.
-- 98 backend tests pass (100% green).
-- Monorepo TypeScript typecheck: 0 errors.
-- Admin production Next.js build: PASS.
-- Web production Next.js build: PASS.
-- Production API base URL configuration normalized and verified.
-- Working tree clean. Zero database deployment blockers remain.
+- The application and database are functionally healthy, fully authenticated, secure, and production-operational.
+- The verdict is classified as **READY WITH ISSUES** rather than pure **PRODUCTION READY** to account for the following non-blocking technical debt items:
+  1. **Legacy Compatibility Tables**: `roles` and `user_roles` exist in the database as empty, unused artifacts from historical migration replay and should be dropped in a subsequent cleanup migration.
+  2. **Volunteer Unique Constraint**: `volunteer_assignments` lacks the `uq_event_volunteer_session_role` composite unique constraint on `(event_id, student_id, session_id, role)`, which should be added via `ALTER TABLE volunteer_assignments ADD CONSTRAINT ...`.
+  3. **Biometric Face Embedding Inference Worker**: Remains a documented mock/stub pending dedicated ONNX/Azure deployment.
+  4. **CI/CD Fresh Database Container**: Ephemeral PostgreSQL CI integration remains planned infrastructure debt.
+
 
