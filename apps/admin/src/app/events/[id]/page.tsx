@@ -199,6 +199,24 @@ export default function EventDetailPage({ params }: { params: Promise<{ id: stri
             >
               Roster ({event.confirmed_count})
             </Link>
+            <Link
+              href={`/events/${resolvedParams.id}/feedback`}
+              style={{
+                backgroundColor: '#1E293B',
+                color: '#FCD34D',
+                border: '1px solid #78350F',
+                padding: '8px 16px',
+                borderRadius: '6px',
+                fontSize: '0.875rem',
+                fontWeight: 600,
+                textDecoration: 'none',
+                minHeight: '44px',
+                display: 'inline-flex',
+                alignItems: 'center',
+              }}
+            >
+              ★ Feedback
+            </Link>
           </div>
         </div>
       </div>

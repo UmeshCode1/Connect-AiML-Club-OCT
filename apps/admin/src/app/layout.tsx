@@ -55,6 +55,12 @@ export default function RootLayout({
             <Link href="/events" style={{ color: '#38BDF8', fontSize: '0.9rem', fontWeight: 600 }}>
               Events
             </Link>
+            <Link href="/chronicle" style={{ color: '#E2E8F0', fontSize: '0.9rem', fontWeight: 500 }}>
+              Chronicle
+            </Link>
+            <Link href="/journey" style={{ color: '#E2E8F0', fontSize: '0.9rem', fontWeight: 500 }}>
+              Journey
+            </Link>
             <Link href="/events/new" style={{
               backgroundColor: '#014B7A',
               color: '#FFFFFF',

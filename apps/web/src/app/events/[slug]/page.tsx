@@ -182,6 +182,10 @@ export default function PublicEventDetailPage({ params }: { params: Promise<{ sl
               •{' '}
               <Link href={`/events/${event.slug}/photos`} style={{ color: 'var(--color-brand-primary, #014B7A)', fontWeight: 600, textDecoration: 'underline' }}>
                 Discover Event Photos →
+              </Link>{' '}
+              •{' '}
+              <Link href={`/events/${event.slug}/feedback`} style={{ color: '#00763C', fontWeight: 600, textDecoration: 'underline' }}>
+                Submit / View Feedback →
               </Link>
             </p>
           </div>

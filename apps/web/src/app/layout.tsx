@@ -77,6 +77,8 @@ export default function RootLayout({
             <BrandHeader showTagline={true} />
             <nav style={{ display: 'flex', gap: '20px', alignItems: 'center', fontSize: '0.9375rem', fontWeight: 500 }}>
               <a href="/events">Events</a>
+              <a href="/chronicle">Chronicle</a>
+              <a href="/journey">Journey</a>
               <a href="/verify/smoke-check">Verify</a>
               <a
                 href="/auth"
