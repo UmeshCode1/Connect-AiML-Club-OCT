@@ -232,3 +232,170 @@ def test_not_me_dispute_workflow(client):
     )
     assert res_resolve.status_code == 200
     assert res_resolve.json()["data"]["status"] == "RESOLVED_DISPUTED"
+
+
+# ------------------------------------------------------------------------------
+# 5. Security Regression Tests (Phase 4.1 Audit Suite)
+# ------------------------------------------------------------------------------
+
+def test_embedding_vectors_never_leaked_in_any_api(client):
+    """
+    Critical Boundary Test:
+    Ensures that raw embeddings or vector fields are NEVER serialized in any API response.
+    """
+    # 1. Enroll user
+    res_enroll = client.post(
+        "/v1/me/face-enrollment",
+        json={"consent_version": "v1.0", "confirm_opt_in": True},
+        headers=ADMIN_AUTH,
+    )
+    assert res_enroll.status_code == 201
+    body_enroll = str(res_enroll.json()).lower()
+    assert "embedding" not in body_enroll
+    assert "vector" not in body_enroll
+
+    # 2. Ingest asset
+    res_asset = client.post(
+        "/v1/events/00000000-0000-0000-0000-000000000101/media",
+        json={
+            "event_id": "00000000-0000-0000-0000-000000000101",
+            "media_type": "PHOTO",
+            "original_filename": "stage_photo_leak_test.jpg",
+            "mime_type": "image/jpeg",
+            "file_size": 2 * 1024 * 1024,
+            "google_drive_file_id": "1DriveFileLeakTest006",
+        },
+        headers=ADMIN_AUTH,
+    )
+    assert res_asset.status_code == 201
+    asset_data = res_asset.json()["data"]
+    assert "embedding" not in asset_data
+    assert "vector" not in asset_data
+
+    # 3. Search faces
+    res_search = client.post(
+        "/v1/events/00000000-0000-0000-0000-000000000101/media/search-faces",
+        headers={"Authorization": "Bearer dev-admin-token"},
+    )
+    assert res_search.status_code == 200
+    search_data = res_search.json()["data"]
+    assert "embedding" not in search_data
+    assert "vector" not in search_data
+    for match in search_data.get("matches", []):
+        assert "embedding" not in match
+        assert "vector" not in match
+
+
+def test_unauthorized_user_cannot_upload_media(client):
+    """
+    Ensures that a non-admin/non-manager without 'media.upload' is rejected with 403.
+    """
+    res = client.post(
+        "/v1/events/00000000-0000-0000-0000-000000000101/media",
+        json={
+            "event_id": "00000000-0000-0000-0000-000000000101",
+            "media_type": "PHOTO",
+            "original_filename": "unauthorized.jpg",
+            "mime_type": "image/jpeg",
+            "file_size": 1024,
+            "google_drive_file_id": "1DriveUnauthorized007",
+        },
+        headers=VIEWER_AUTH,
+    )
+    assert res.status_code == 403
+
+
+def test_unauthorized_user_cannot_resolve_disputes(client):
+    """
+    Ensures that a regular student/viewer cannot resolve administrative dispute reports.
+    """
+    res = client.patch(
+        "/v1/admin/face-reports/rep-fake-id",
+        json={"status": "RESOLVED_DISPUTED", "resolution_notes": "Attempted exploit"},
+        headers=VIEWER_AUTH,
+    )
+    assert res.status_code == 403
+
+
+def test_consent_withdrawal_immediately_blocks_face_discovery(client):
+    """
+    Ensures that immediately following consent withdrawal, any face search
+    is rejected with 403 Forbidden.
+    """
+    # 1. Enroll
+    client.post(
+        "/v1/me/face-enrollment",
+        json={"consent_version": "v1.0", "confirm_opt_in": True},
+        headers=VIEWER_AUTH,
+    )
+
+    # 2. Withdraw
+    del_res = client.delete("/v1/me/face-enrollment", headers=VIEWER_AUTH)
+    assert del_res.status_code == 200
+
+    # 3. Attempt search - MUST fail
+    search_res = client.post(
+        "/v1/events/00000000-0000-0000-0000-000000000101/media/search-faces",
+        headers=VIEWER_AUTH,
+    )
+    assert search_res.status_code == 403
+    assert "requires active opt-in consent" in search_res.json()["error"]["message"]
+
+
+def test_unknown_faces_remain_unlinked(client):
+    """
+    Ensures that unknown faces with no matched student remain unassigned
+    and are not inferred or returned to arbitrary searchers.
+    """
+    # Add an anonymous face
+    media_service.media_faces["anon-face-01"] = {
+        "id": "anon-face-01",
+        "media_asset_id": "med-fake",
+        "matched_student_id": None,
+        "confidence": None,
+    }
+
+    # Verify student search does not match anon face
+    client.post(
+        "/v1/me/face-enrollment",
+        json={"consent_version": "v1.0", "confirm_opt_in": True},
+        headers=ADMIN_AUTH,
+    )
+    res = client.post(
+        "/v1/events/00000000-0000-0000-0000-000000000101/media/search-faces",
+        headers=ADMIN_AUTH,
+    )
+    assert res.status_code == 200
+    matched_ids = [m["media_asset_id"] for m in res.json()["data"]["matches"]]
+    assert "med-fake" not in matched_ids
+
+
+def test_duplicate_google_drive_file_id_rejected(client):
+    """
+    Ensures that duplicate Google Drive file IDs cannot be registered across assets.
+    """
+    payload = {
+        "event_id": "00000000-0000-0000-0000-000000000101",
+        "media_type": "PHOTO",
+        "original_filename": "photo_1.jpg",
+        "mime_type": "image/jpeg",
+        "file_size": 1024,
+        "google_drive_file_id": "1UniqueDriveFileId999",
+    }
+    # First ingestion succeeds
+    res1 = client.post(
+        "/v1/events/00000000-0000-0000-0000-000000000101/media",
+        json=payload,
+        headers=ADMIN_AUTH,
+    )
+    assert res1.status_code == 201
+
+    # Second ingestion with same drive file ID fails with 409 Conflict
+    res2 = client.post(
+        "/v1/events/00000000-0000-0000-0000-000000000101/media",
+        json=payload,
+        headers=ADMIN_AUTH,
+    )
+    assert res2.status_code == 409
+    assert "already registered" in res2.json()["error"]["message"]
+
