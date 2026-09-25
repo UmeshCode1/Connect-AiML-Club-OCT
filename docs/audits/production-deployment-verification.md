@@ -59,8 +59,8 @@ The migration chain consists of 7 immutable, forward-only SQL files in `supabase
 - **Target Production Project**: `connect-aiml-club-oct` (as specified in `supabase/config.toml`).
 - **CLI Check**: `npx.cmd supabase` (v2.117.0) executed `supabase migration list`.
 - **CLI Response**: `{"_tag":"Error","error":{"code":"LegacyProjectNotLinkedError","message":"Cannot find project ref. Have you run supabase link?"}}`
-- **Result**: **BLOCKED FROM AUTOMATED EXECUTION / AWAITING OPERATOR LINKAGE**.
-- **Reason**: The Supabase CLI is not linked to project `connect-aiml-club-oct` in this environment, and `SUPABASE_ACCESS_TOKEN` is not present in the runtime environment (adhering strictly to Rule 10 "Never Commit Secrets"). Under mandatory safety rules, automated `supabase db push` against an unlinked/unverified project is prohibited. Migration `000007` must be applied by the authorized project maintainer.
+- **Migration 000007**: **BLOCKED — OPERATOR AUTHENTICATION REQUIRED**.
+- **Reason**: The Supabase CLI is not linked to project `connect-aiml-club-oct` in this environment, and `SUPABASE_ACCESS_TOKEN` is not present in the runtime environment (adhering strictly to Rule 10 "Never Commit Secrets"). Under mandatory safety rules, automated `supabase db push` against an unlinked/unverified project is prohibited. Migration `000007` must be applied by the authorized project maintainer with production access.
 
 ---
 
