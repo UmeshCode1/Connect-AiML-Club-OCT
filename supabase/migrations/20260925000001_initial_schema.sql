@@ -216,13 +216,17 @@ CREATE INDEX IF NOT EXISTS idx_attendance_event ON attendance_records(event_id);
 CREATE INDEX IF NOT EXISTS idx_certificates_cert_id ON certificates(certificate_id);
 CREATE INDEX IF NOT EXISTS idx_media_drive_file ON media_assets(google_drive_file_id);
 
--- 13. ROW LEVEL SECURITY (RLS) ACTIVATION
+-- 13. ROW LEVEL SECURITY (RLS) ACTIVATION ACROSS ALL TABLES
 ALTER TABLE accounts ENABLE ROW LEVEL SECURITY;
 ALTER TABLE student_profiles ENABLE ROW LEVEL SECURITY;
+ALTER TABLE team_roles ENABLE ROW LEVEL SECURITY;
+ALTER TABLE team_memberships ENABLE ROW LEVEL SECURITY;
 ALTER TABLE events ENABLE ROW LEVEL SECURITY;
 ALTER TABLE event_participations ENABLE ROW LEVEL SECURITY;
 ALTER TABLE attendance_records ENABLE ROW LEVEL SECURITY;
+ALTER TABLE drive_folders ENABLE ROW LEVEL SECURITY;
 ALTER TABLE media_assets ENABLE ROW LEVEL SECURITY;
+ALTER TABLE certificate_templates ENABLE ROW LEVEL SECURITY;
 ALTER TABLE certificates ENABLE ROW LEVEL SECURITY;
 ALTER TABLE audit_logs ENABLE ROW LEVEL SECURITY;
 
@@ -234,3 +238,10 @@ CREATE POLICY "Public events are viewable by everyone" ON events
 -- Public can verify genuine certificates without authentication
 CREATE POLICY "Certificates public verification view" ON certificates
   FOR SELECT USING (status = 'VALID');
+
+-- Team roles and public memberships viewable for institutional transparency
+CREATE POLICY "Team roles viewable by authenticated users" ON team_roles
+  FOR SELECT TO authenticated USING (true);
+
+CREATE POLICY "Active team memberships viewable by everyone" ON team_memberships
+  FOR SELECT USING (status = 'ACTIVE');
