@@ -1,0 +1,23 @@
+{
+  "name": "AIML Club OCT — Connect",
+  "short_name": "Connect",
+  "description": "Unified platform for AI & Machine Learning Club, Oriental College of Technology, Bhopal",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#111820",
+  "theme_color": "#014B7A",
+  "icons": [
+    {
+      "src": "/brand/aiml-club-mark-101.png",
+      "sizes": "101x101",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/brand/aiml-club-logo-500.png",
+      "sizes": "500x500",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}

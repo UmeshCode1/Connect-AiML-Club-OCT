@@ -1,0 +1,20 @@
+# AIML Club OCT — Connect Robots Policy
+User-agent: *
+Allow: /
+Allow: /events
+Allow: /journey
+Allow: /chronicle
+Allow: /projects
+Allow: /research
+Allow: /learning
+Allow: /verify/
+
+# Disallow private and administrative surfaces
+Disallow: /admin/
+Disallow: /api/
+Disallow: /dashboard/
+Disallow: /settings/
+Disallow: /attendance/
+Disallow: /private/
+
+Sitemap: https://app.aimlcluboct.in/sitemap.xml
