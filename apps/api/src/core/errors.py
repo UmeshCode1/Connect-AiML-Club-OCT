@@ -1,5 +1,7 @@
 from fastapi import Request
 from fastapi.responses import JSONResponse
+from fastapi.exceptions import RequestValidationError
+from starlette.exceptions import HTTPException as StarletteHTTPException
 import uuid
 
 
@@ -34,6 +36,38 @@ async def connect_exception_handler(request: Request, exc: ConnectAPIException) 
             "error": {
                 "code": exc.code,
                 "message": exc.message,
+                "request_id": request_id,
+            }
+        },
+    )
+
+
+async def validation_exception_handler(request: Request, exc: RequestValidationError) -> JSONResponse:
+    request_id = getattr(request.state, "request_id", f"req_{uuid.uuid4().hex[:12]}")
+    # Extract first validation issue without leaking raw traceback
+    first_error = exc.errors()[0] if exc.errors() else {"msg": "Validation failed"}
+    msg = f"{first_error.get('loc', ['request'])[-1]}: {first_error.get('msg', 'Invalid input')}"
+    return JSONResponse(
+        status_code=422,
+        content={
+            "error": {
+                "code": "VALIDATION_ERROR",
+                "message": msg,
+                "request_id": request_id,
+            }
+        },
+    )
+
+
+async def http_exception_handler(request: Request, exc: StarletteHTTPException) -> JSONResponse:
+    request_id = getattr(request.state, "request_id", f"req_{uuid.uuid4().hex[:12]}")
+    code = "NOT_FOUND" if exc.status_code == 404 else "HTTP_ERROR"
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={
+            "error": {
+                "code": code,
+                "message": str(exc.detail),
                 "request_id": request_id,
             }
         },
