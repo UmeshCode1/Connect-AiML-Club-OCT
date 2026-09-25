@@ -54,9 +54,13 @@ export type PermissionAction =
   | 'face.search'
   | 'face.dispute'
   | 'certificates.view'
+  | 'certificates.create'
   | 'certificates.generate'
+  | 'certificates.approve'
   | 'certificates.issue'
   | 'certificates.revoke'
+  | 'certificates.replace'
+  | 'certificates.template.manage'
   | 'feedback.view'
   | 'feedback.publish'
   | 'chronicle.view'
@@ -355,7 +359,112 @@ export type CertificateType =
   | 'ORGANIZER'
   | 'CUSTOM';
 
-export type CertificateStatus = 'GENERATED' | 'ISSUED' | 'VALID' | 'REVOKED' | 'REPLACED';
+export type CertificateStatus =
+  | 'DRAFT'
+  | 'PENDING_APPROVAL'
+  | 'APPROVED'
+  | 'GENERATED'
+  | 'ISSUED'
+  | 'VALID'
+  | 'REVOKED'
+  | 'REPLACED';
+
+export type CertificateFieldName =
+  | 'RECIPIENT_NAME'
+  | 'EVENT_NAME'
+  | 'EVENT_DATE'
+  | 'CERTIFICATE_ID'
+  | 'ISSUE_DATE'
+  | 'SIGNATORY_TITLE'
+  | 'CUSTOM';
+
+export interface CertificateFieldPlacement {
+  field_name: CertificateFieldName;
+  x: number; // percentage or px
+  y: number;
+  width?: number;
+  height?: number;
+  font_size?: number;
+  font_weight?: string;
+  font_family?: string;
+  color?: string;
+  text_align?: 'left' | 'center' | 'right';
+}
+
+export interface CertificateTemplateConfig {
+  fields: CertificateFieldPlacement[];
+  dimensions?: { width: number; height: number };
+  qr_placement?: { x: number; y: number; size: number };
+}
+
+export interface CertificateTemplateVersion {
+  id: string;
+  template_id: string;
+  version_number: number;
+  configuration: CertificateTemplateConfig;
+  google_drive_file_id?: string;
+  changelog?: string;
+  created_by?: string;
+  created_at: string;
+}
+
+export interface CertificateTemplate {
+  id: string;
+  name: string;
+  certificate_type: CertificateType;
+  google_drive_file_id?: string;
+  configuration: CertificateTemplateConfig;
+  version: number;
+  status: 'DRAFT' | 'ACTIVE' | 'ARCHIVED';
+  versions?: CertificateTemplateVersion[];
+  created_by?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export type BatchStatus =
+  | 'DRAFT'
+  | 'GENERATING'
+  | 'GENERATED'
+  | 'PENDING_APPROVAL'
+  | 'APPROVED'
+  | 'ISSUED'
+  | 'FAILED';
+
+export interface CertificateBatch {
+  id: string;
+  event_id: string;
+  template_id: string;
+  template_version_id?: string;
+  certificate_type: CertificateType;
+  status: BatchStatus;
+  eligibility_criteria: {
+    min_attendance_sessions?: number;
+    require_confirmed_registration?: boolean;
+    target_roles?: string[];
+  };
+  total_eligible: number;
+  total_generated: number;
+  total_failed: number;
+  approved_by?: string;
+  approved_at?: string;
+  issued_at?: string;
+  created_by?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface CertificateRecipientEligibility {
+  student_id: string;
+  full_name: string;
+  enrollment_number: string;
+  email?: string;
+  attended_sessions: number;
+  total_sessions: number;
+  is_eligible: boolean;
+  ineligibility_reason?: string;
+  existing_certificate_id?: string;
+}
 
 export interface Certificate {
   id: string;
@@ -363,8 +472,10 @@ export interface Certificate {
   verification_token_hash: string;
   student_id: string;
   event_id?: string;
+  batch_id?: string;
   certificate_type: CertificateType;
   template_id?: string;
+  template_version_id?: string;
   google_drive_file_id?: string;
   status: CertificateStatus;
   issued_at?: string;
@@ -372,6 +483,7 @@ export interface Certificate {
   replaced_by?: string;
   revoked_at?: string;
   revoke_reason?: string;
+  metadata?: Record<string, any>;
   created_at: string;
   updated_at: string;
 }
@@ -382,9 +494,14 @@ export interface PublicCertificateVerification {
   recipient_name: string;
   event_title: string;
   event?: string;
+  event_date?: string;
   certificate_type: string;
   issued_at: string;
   status: CertificateStatus;
+  verification_url?: string;
+  revoked_at?: string;
+  revoke_reason?: string;
+  replaced_by_certificate_id?: string;
 }
 
 // -----------------------------------------------------------------------------
