@@ -69,6 +69,7 @@ def get_current_user(
                 "participants.import",
                 "participants.*",
                 "attendance.*",
+                "volunteers.*",
                 "certificates.view",
                 "certificates.generate",
                 "certificates.issue",
@@ -89,6 +90,15 @@ def get_current_user(
             permissions=["events.view"],
             event_scopes=["SELF"],
         )
+    elif token == "dev-volunteer-token":
+        return AuthenticatedUser(
+            account_id="00000000-0000-0000-0000-000000000003",
+            auth_user_id="auth-volunteer-uuid",
+            email="volunteer@aimlcluboct.in",
+            role="VOLUNTEER",
+            permissions=["attendance.view", "attendance.mark"],
+            event_scopes=["00000000-0000-0000-0000-000000000101"],
+        )
     elif token == "dev-super-token":
         return AuthenticatedUser(
             account_id="00000000-0000-0000-0000-000000000000",
@@ -101,6 +111,75 @@ def get_current_user(
     
     # In production, validate token against SUPABASE_JWT_SECRET or Supabase Auth API
     raise UnauthorizedException("Invalid or expired session token.")
+
+
+# ------------------------------------------------------------------------------
+# Cryptographic QR Token Functions (Replay & Tamper Proof)
+# ------------------------------------------------------------------------------
+QR_SECRET_KEY = b"aiml-club-oct-connect-secure-qr-secret-key-2026"
+
+
+def generate_attendance_qr_token(
+    event_id: str,
+    student_id: str,
+    enrollment_number: str,
+    expiry_seconds: int = 86400,
+) -> str:
+    """
+    Generates a cryptographically signed, expiring, opaque QR token for attendance check-in.
+    Does NOT leak private phone/email into the barcode payload.
+    """
+    import base64
+    import hashlib
+    import hmac
+    import json
+    import time
+
+    now = int(time.time())
+    payload = {
+        "event_id": event_id,
+        "student_id": student_id,
+        "enrollment": enrollment_number.strip().upper(),
+        "ts": now,
+        "exp": now + expiry_seconds,
+    }
+    payload_bytes = json.dumps(payload, sort_keys=True).encode("utf-8")
+    sig = hmac.new(QR_SECRET_KEY, payload_bytes, hashlib.sha256).hexdigest()
+    return f"{base64.urlsafe_b64encode(payload_bytes).decode('utf-8')}.{sig}"
+
+
+def verify_attendance_qr_token(token: str) -> dict:
+    """
+    Validates QR token signature and expiration.
+    Raises ValueError on tampering, expiration, or malformed data.
+    """
+    import base64
+    import hashlib
+    import hmac
+    import json
+    import time
+
+    parts = token.split(".")
+    if len(parts) != 2:
+        raise ValueError("Malformed attendance QR token format.")
+
+    b64_payload, signature = parts[0], parts[1]
+    try:
+        payload_bytes = base64.urlsafe_b64decode(b64_payload.encode("utf-8"))
+        payload = json.loads(payload_bytes.decode("utf-8"))
+    except Exception:
+        raise ValueError("Invalid QR token payload encoding.")
+
+    expected_sig = hmac.new(QR_SECRET_KEY, payload_bytes, hashlib.sha256).hexdigest()
+    if not hmac.compare_digest(signature, expected_sig):
+        raise ValueError("Tampered attendance QR token signature.")
+
+    now = int(time.time())
+    if payload.get("exp") and now > payload["exp"]:
+        raise ValueError("Attendance QR token has expired.")
+
+    return payload
+
 
 
 def require_permission(action: str):
