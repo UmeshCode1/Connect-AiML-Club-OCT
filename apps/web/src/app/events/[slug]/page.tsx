@@ -175,6 +175,10 @@ export default function PublicEventDetailPage({ params }: { params: Promise<{ sl
             </h2>
             <p style={{ fontSize: '0.9rem', color: '#64748B', marginTop: '4px' }}>
               Open to students of Oriental College of Technology (OCT) and affiliated institutions.
+              Already registered?{' '}
+              <Link href={`/events/${event.slug}/pass`} style={{ color: 'var(--color-brand-primary, #014B7A)', fontWeight: 600, textDecoration: 'underline' }}>
+                Access your Digital Attendance Pass →
+              </Link>
             </p>
           </div>
 
@@ -199,6 +203,23 @@ export default function PublicEventDetailPage({ params }: { params: Promise<{ sl
                 ✓ Registration Successful
               </div>
               <p style={{ fontSize: '0.95rem', lineHeight: 1.5 }}>{registrationResult.message}</p>
+              <div style={{ marginTop: '16px' }}>
+                <Link
+                  href={`/events/${event.slug}/pass`}
+                  style={{
+                    display: 'inline-block',
+                    backgroundColor: 'var(--color-brand-primary, #014B7A)',
+                    color: 'white',
+                    padding: '10px 18px',
+                    borderRadius: '6px',
+                    textDecoration: 'none',
+                    fontWeight: 600,
+                    fontSize: '0.9rem',
+                  }}
+                >
+                  View Digital Attendance Pass →
+                </Link>
+              </div>
             </div>
           ) : (
             <form onSubmit={handleRegister} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
