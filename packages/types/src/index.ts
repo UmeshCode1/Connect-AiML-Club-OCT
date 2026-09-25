@@ -600,3 +600,240 @@ export interface FaceMatchReport {
   created_at: string;
 }
 
+// -----------------------------------------------------------------------------
+// 8. Chronicle, Journey & Feedback (Phase 6.1)
+// -----------------------------------------------------------------------------
+
+export type ChronicleEditionType =
+  | 'WEEKLY_UPDATE'
+  | 'MONTHLY_DIGEST'
+  | 'EVENT_RECAP'
+  | 'RESEARCH_DIGEST'
+  | 'COMMUNITY_UPDATE'
+  | 'INSTITUTIONAL_ANNOUNCEMENT';
+
+export type ChronicleStatus = 'DRAFT' | 'REVIEW' | 'SCHEDULED' | 'PUBLISHED' | 'ARCHIVED';
+
+export type ChronicleVisibility = 'PUBLIC' | 'MEMBERS_ONLY' | 'INTERNAL';
+
+export interface EventChronicleItem {
+  id: string;
+  chronicle_id: string;
+  event_id: string;
+  display_order: number;
+  event_title?: string;
+  event_slug?: string;
+  event_type?: string;
+  start_at?: string;
+  venue?: string;
+  event?: {
+    id: string;
+    title: string;
+    slug: string;
+    event_type?: string;
+    start_date?: string;
+    end_date?: string;
+    venue?: string;
+    cover_image_url?: string;
+  };
+}
+
+export interface ChronicleEntry {
+  id: string;
+  title: string;
+  slug: string;
+  edition_type: ChronicleEditionType;
+  excerpt?: string;
+  content: string; // Markdown or sanitized HTML
+  cover_media_id?: string;
+  cover_media_url?: string;
+  visibility: ChronicleVisibility;
+  status: ChronicleStatus;
+  scheduled_at?: string;
+  published_at?: string;
+  created_by?: string;
+  approved_by?: string;
+  seo_title?: string;
+  seo_description?: string;
+  linked_events?: EventChronicleItem[];
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ChronicleCreatePayload {
+  title: string;
+  slug?: string;
+  edition_type: ChronicleEditionType;
+  excerpt?: string;
+  content: string;
+  cover_media_id?: string;
+  visibility?: ChronicleVisibility;
+  scheduled_at?: string;
+  seo_title?: string;
+  seo_description?: string;
+  linked_event_ids?: string[];
+}
+
+export interface ChronicleUpdatePayload {
+  title?: string;
+  slug?: string;
+  edition_type?: ChronicleEditionType;
+  excerpt?: string;
+  content?: string;
+  cover_media_id?: string;
+  visibility?: ChronicleVisibility;
+  status?: ChronicleStatus;
+  scheduled_at?: string;
+  seo_title?: string;
+  seo_description?: string;
+  linked_event_ids?: string[];
+}
+
+export type JourneyMilestoneType =
+  | 'FOUNDATION'
+  | 'EVENT'
+  | 'ACHIEVEMENT'
+  | 'PARTNERSHIP'
+  | 'LEADERSHIP'
+  | 'RESEARCH'
+  | 'COLLABORATION'
+  | 'OTHER';
+
+export type JourneyMilestoneStatus = 'DRAFT' | 'PUBLISHED' | 'ARCHIVED';
+
+export type JourneyMilestoneVisibility = 'PUBLIC' | 'MEMBERS_ONLY' | 'INTERNAL';
+
+export interface JourneyMilestone {
+  id: string;
+  title: string;
+  slug: string;
+  milestone_date: string; // YYYY-MM-DD
+  milestone_type: JourneyMilestoneType;
+  description: string;
+  cover_media_id?: string;
+  cover_media_url?: string;
+  linked_event_id?: string;
+  linked_event_title?: string;
+  linked_event_slug?: string;
+  linked_event?: {
+    id: string;
+    title: string;
+    slug: string;
+    start_date?: string;
+  };
+  linked_project_id?: string;
+  external_link?: string;
+  visibility: JourneyMilestoneVisibility;
+  status: JourneyMilestoneStatus;
+  display_order: number;
+  published_at?: string;
+  created_by?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface JourneyMilestoneCreatePayload {
+  title: string;
+  slug?: string;
+  milestone_date: string;
+  milestone_type: JourneyMilestoneType;
+  description: string;
+  cover_media_id?: string;
+  linked_event_id?: string;
+  linked_project_id?: string;
+  external_link?: string;
+  visibility?: JourneyMilestoneVisibility;
+  status?: JourneyMilestoneStatus;
+  display_order?: number;
+}
+
+export interface JourneyMilestoneUpdatePayload {
+  title?: string;
+  slug?: string;
+  milestone_date?: string;
+  milestone_type?: JourneyMilestoneType;
+  description?: string;
+  cover_media_id?: string;
+  linked_event_id?: string;
+  linked_project_id?: string;
+  external_link?: string;
+  visibility?: JourneyMilestoneVisibility;
+  status?: JourneyMilestoneStatus;
+  display_order?: number;
+}
+
+export type FeedbackSource = 'PORTAL' | 'PWA' | 'EVENT_APP';
+
+export type FeedbackPublicationConsent = 'NO' | 'ANONYMOUS' | 'PUBLIC_NAME';
+
+export type FeedbackModerationStatus = 'PENDING' | 'APPROVED' | 'REJECTED';
+
+export type FeedbackVisibility = 'ADMIN_ONLY' | 'PUBLIC';
+
+export interface Feedback {
+  id: string;
+  event_id: string;
+  student_id: string;
+  participation_id?: string;
+  source: FeedbackSource;
+  rating: number; // 1 to 5
+  feedback_text?: string;
+  suggestion_text?: string;
+  publication_consent: FeedbackPublicationConsent;
+  is_anonymous: boolean;
+  moderation_status: FeedbackModerationStatus;
+  visibility: FeedbackVisibility;
+  moderated_by?: string;
+  moderated_at?: string;
+  moderation_notes?: string;
+  created_at: string;
+  updated_at: string;
+  // Optional expanded relations (admin only)
+  student?: {
+    id: string;
+    full_name: string;
+    enrollment_number?: string;
+  };
+  event?: {
+    id: string;
+    title: string;
+    slug: string;
+  };
+}
+
+export interface PublicFeedback {
+  id: string;
+  event_id: string;
+  rating: number;
+  feedback_text?: string;
+  suggestion_text?: string;
+  author_name?: string; // either real name if PUBLIC_NAME, or "Anonymous Participant"
+  is_anonymous: boolean;
+  created_at: string;
+}
+
+export interface FeedbackCreatePayload {
+  rating: number; // 1-5
+  feedback_text?: string;
+  suggestion_text?: string;
+  publication_consent?: FeedbackPublicationConsent;
+  source?: FeedbackSource;
+}
+
+export interface FeedbackModeratePayload {
+  moderation_status: FeedbackModerationStatus;
+  visibility?: FeedbackVisibility;
+  moderation_notes?: string;
+}
+
+export interface FeedbackSummary {
+  event_id: string;
+  total_feedback: number;
+  average_rating: number;
+  rating_distribution: Record<number, number>; // 1: n, 2: n, ...
+  pending_moderation_count: number;
+  approved_count: number;
+  rejected_count: number;
+}
+
+

@@ -185,7 +185,14 @@ class EventService:
 
         return EventResponse(**evt)
 
+    def get_event_by_id(self, event_id: str) -> Optional[EventResponse]:
+        evt = self._events.get(event_id)
+        if not evt:
+            return None
+        return EventResponse(**evt)
+
     # --------------------------------------------------------------------------
+
     # Event Mutations (CRUD & Lifecycle)
     # --------------------------------------------------------------------------
     def create_event(self, data: EventCreate, actor_id: str) -> EventResponse:

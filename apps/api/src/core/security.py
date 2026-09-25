@@ -79,6 +79,7 @@ def get_current_user(
                 "media.*",
                 "chronicle.*",
                 "journey.*",
+                "feedback.*",
                 "projects.*"
             ],
             event_scopes=["GLOBAL"],
@@ -190,6 +191,15 @@ def get_current_user(
             role="SUPER_ADMIN",
             permissions=["*"],
             event_scopes=["GLOBAL"],
+        )
+    elif token == "dev-student-token":
+        return AuthenticatedUser(
+            account_id="00000000-0000-0000-0000-000000000008",
+            auth_user_id="auth-student-uuid",
+            email="student@aimlcluboct.in",
+            role="VIEWER",
+            permissions=["events.view", "feedback.submit"],
+            event_scopes=["SELF"],
         )
     
     # In production, validate token against SUPABASE_JWT_SECRET or Supabase Auth API
