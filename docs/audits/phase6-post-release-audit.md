@@ -30,10 +30,12 @@ This independent post-release audit evaluates the **Phase 6.1: Chronicle, Journe
 
 - **Current Branch**: `main`
 - **Audited Release Tag**: `v1.5.0` (published at commit `5fa93d0`)
-- **Current Head Commit**: `d9fa088` (includes remediation commits `56d777c` and `d9fa088`)
+- **Current Head Commit**: `e93578a` (includes remediation commits `56d777c`, `d9fa088`, and `e93578a`)
 - **Working Tree State**: Clean
 - **Commit History Summary**:
   ```text
+  e93578a fix(config): normalize api base url resolution across frontend packages
+  69d1052 docs(audit): update phase 6 post-release audit
   d9fa088 test(phase6): add regression coverage for scheduled privacy and scheme validation
   56d777c fix(phase6): enforce scheduled publication privacy and link scheme validation
   5fa93d0 docs(phase6): document communication and institutional legacy modules
@@ -389,6 +391,12 @@ All three defects identified during the audit were isolated, fixed, and verified
 
 ## 22. Final Verdict
 
-### **PRODUCTION READY**
+### **READY WITH ISSUES**
 
-*(Note: Prior to applying commits `56d777c` and `d9fa088`, release v1.5.0 as initially tagged had issues (DEF-01, DEF-02). With the audit remediation completed, verified, and committed to `main`, the baseline is now fully hardened and **PRODUCTION READY**).*
+**Classification Rationale**:
+- **Application & Security State**: **PASS**. All code, RLS, RBAC, API, privacy, build, and test gates are verified and functional with zero critical vulnerabilities.
+- **Production Gate Conditions**: The system is classified as **READY WITH ISSUES** because:
+  1. Migration `20260925000007_chronicle_journey_feedback.sql` must be applied to the live production Supabase instance by the project owner.
+  2. Fresh database execution was validated at source level but could not be dynamically executed in the current environment due to absence of local Docker/PostgreSQL tooling.
+  3. The Phase 4 face embedding neural inference worker remains a documented mock/stub.
+Once migration `000007` is applied to production Supabase, the deployment is fully operational.
