@@ -110,9 +110,9 @@ export default function EventDetailPage({ params }: { params: Promise<{ id: stri
             </div>
           </div>
 
-          <div style={{ display: 'flex', gap: '10px' }}>
+          <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
             <Link
-              href={`/events/${resolvedParams.id}/participants`}
+              href={`/events/${resolvedParams.id}/sessions`}
               style={{
                 backgroundColor: '#014B7A',
                 color: '#FFFFFF',
@@ -126,7 +126,43 @@ export default function EventDetailPage({ params }: { params: Promise<{ id: stri
                 alignItems: 'center',
               }}
             >
-              Participant Roster ({event.confirmed_count})
+              Sessions & Attendance
+            </Link>
+            <Link
+              href={`/events/${resolvedParams.id}/volunteers`}
+              style={{
+                backgroundColor: '#1E293B',
+                color: '#E2E8F0',
+                border: '1px solid #334155',
+                padding: '8px 16px',
+                borderRadius: '6px',
+                fontSize: '0.875rem',
+                fontWeight: 600,
+                textDecoration: 'none',
+                minHeight: '44px',
+                display: 'inline-flex',
+                alignItems: 'center',
+              }}
+            >
+              Volunteers
+            </Link>
+            <Link
+              href={`/events/${resolvedParams.id}/participants`}
+              style={{
+                backgroundColor: '#1E293B',
+                color: '#E2E8F0',
+                border: '1px solid #334155',
+                padding: '8px 16px',
+                borderRadius: '6px',
+                fontSize: '0.875rem',
+                fontWeight: 600,
+                textDecoration: 'none',
+                minHeight: '44px',
+                display: 'inline-flex',
+                alignItems: 'center',
+              }}
+            >
+              Roster ({event.confirmed_count})
             </Link>
           </div>
         </div>
