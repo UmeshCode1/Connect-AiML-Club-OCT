@@ -147,6 +147,24 @@ export default function EventDetailPage({ params }: { params: Promise<{ id: stri
               Volunteers
             </Link>
             <Link
+              href={`/events/${resolvedParams.id}/media`}
+              style={{
+                backgroundColor: '#1E293B',
+                color: '#E2E8F0',
+                border: '1px solid #334155',
+                padding: '8px 16px',
+                borderRadius: '6px',
+                fontSize: '0.875rem',
+                fontWeight: 600,
+                textDecoration: 'none',
+                minHeight: '44px',
+                display: 'inline-flex',
+                alignItems: 'center',
+              }}
+            >
+              Media Assets
+            </Link>
+            <Link
               href={`/events/${resolvedParams.id}/participants`}
               style={{
                 backgroundColor: '#1E293B',
