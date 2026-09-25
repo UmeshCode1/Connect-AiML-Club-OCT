@@ -11,6 +11,7 @@ def verify_certificate(certificate_id: str) -> ApiResponse[PublicCertificateVeri
     """
     Public Certificate Verification Endpoint.
     Never exposes private student data (phone, email, attendance) per 11_SECURITY_PRIVACY.md.
+    Provides both 'event' and 'event_title' for full client compatibility.
     """
     if certificate_id in ["AIML26-APT-000184", "smoke-check"]:
         data = PublicCertificateVerification(
@@ -18,6 +19,7 @@ def verify_certificate(certificate_id: str) -> ApiResponse[PublicCertificateVeri
             certificate_id=certificate_id,
             recipient_name="Authorized Recipient",
             event_title="Aptify 2.0: AI Symposium",
+            event="Aptify 2.0: AI Symposium",
             certificate_type="Participation",
             issued_at="2026-03-25T10:00:00Z",
             status="VALID",

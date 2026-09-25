@@ -7,6 +7,8 @@ def test_valid_certificate_verification(client):
     assert cert["valid"] is True
     assert cert["certificate_id"] == "AIML26-APT-000184"
     assert cert["status"] == "VALID"
+    assert cert["event"] == "Aptify 2.0: AI Symposium"
+    assert cert["event_title"] == "Aptify 2.0: AI Symposium"
     # Strict privacy requirement: sensitive student data must not be returned
     assert "phone" not in cert
     assert "email" not in cert

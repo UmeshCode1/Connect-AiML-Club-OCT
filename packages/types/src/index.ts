@@ -274,6 +274,7 @@ export interface PublicCertificateVerification {
   certificate_id: string;
   recipient_name: string;
   event_title: string;
+  event?: string;
   certificate_type: string;
   issued_at: string;
   status: CertificateStatus;
