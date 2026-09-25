@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import type { PublicFeedback, FeedbackSummary, FeedbackPublicationConsent } from '@connect/types';
+import { normalizeApiUrl } from '@connect/config';
 
 export default function EventFeedbackPage() {
   const params = useParams();
@@ -26,7 +27,7 @@ export default function EventFeedbackPage() {
   const loadData = async () => {
     setLoading(true);
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+      const apiUrl = normalizeApiUrl(process.env.NEXT_PUBLIC_API_URL);
 
       // 1. Fetch event
       const evRes = await fetch(`${apiUrl}/v1/events/${slug}`);
@@ -96,7 +97,7 @@ export default function EventFeedbackPage() {
     setErrorMessage(null);
 
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+      const apiUrl = normalizeApiUrl(process.env.NEXT_PUBLIC_API_URL);
       const res = await fetch(`${apiUrl}/v1/events/${eventData.id}/feedback`, {
         method: 'POST',
         headers: {

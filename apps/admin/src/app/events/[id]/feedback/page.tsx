@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import type { Feedback, FeedbackSummary, FeedbackModerationStatus } from '@connect/types';
+import { normalizeApiUrl } from '@connect/config';
 
 export default function EventFeedbackAdminPage() {
   const params = useParams();
@@ -18,7 +19,7 @@ export default function EventFeedbackAdminPage() {
   const fetchFeedbackData = async () => {
     setLoading(true);
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+      const apiUrl = normalizeApiUrl(process.env.NEXT_PUBLIC_API_URL);
 
       // 1. Fetch feedbacks
       let listUrl = `${apiUrl}/v1/events/${eventId}/feedback?page_size=50`;
@@ -85,7 +86,7 @@ export default function EventFeedbackAdminPage() {
 
   const handleModerate = async (feedbackId: string, status: FeedbackModerationStatus) => {
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+      const apiUrl = normalizeApiUrl(process.env.NEXT_PUBLIC_API_URL);
       const res = await fetch(`${apiUrl}/v1/feedback/${feedbackId}`, {
         method: 'PATCH',
         headers: {

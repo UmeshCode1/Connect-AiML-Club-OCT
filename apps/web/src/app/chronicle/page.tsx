@@ -2,6 +2,7 @@ import React from 'react';
 import Link from 'next/link';
 import type { Metadata } from 'next';
 import type { ChronicleEntry } from '@connect/types';
+import { normalizeApiUrl } from '@connect/config';
 
 export const metadata: Metadata = {
   title: 'Chronicle — AIML CLUB OCT',
@@ -14,7 +15,7 @@ export const metadata: Metadata = {
 
 async function getChronicles(): Promise<ChronicleEntry[]> {
   try {
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+    const apiUrl = normalizeApiUrl(process.env.NEXT_PUBLIC_API_URL);
     const res = await fetch(`${apiUrl}/v1/chronicle?page_size=30`, {
       next: { revalidate: 60 },
     });

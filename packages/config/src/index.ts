@@ -78,3 +78,13 @@ export const RBAC_ROLES = [
   'VOLUNTEER',
   'VIEWER'
 ] as const;
+
+/**
+ * Normalizes the API base URL, preventing accidental double '/v1/v1' pathing
+ * regardless of whether NEXT_PUBLIC_API_URL contains a trailing /v1 or trailing slash.
+ */
+export function normalizeApiUrl(rawUrl?: string): string {
+  const url = rawUrl || (typeof process !== 'undefined' ? process.env?.NEXT_PUBLIC_API_URL : undefined) || 'http://localhost:8000';
+  return url.replace(/\/v1\/?$/, '').replace(/\/+$/, '');
+}
+

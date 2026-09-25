@@ -2,6 +2,7 @@ import React from 'react';
 import Link from 'next/link';
 import type { Metadata } from 'next';
 import type { JourneyMilestone } from '@connect/types';
+import { normalizeApiUrl } from '@connect/config';
 
 export const metadata: Metadata = {
   title: 'Institutional Journey & Timeline — AIML CLUB OCT',
@@ -14,7 +15,7 @@ export const metadata: Metadata = {
 
 async function getMilestones(): Promise<JourneyMilestone[]> {
   try {
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+    const apiUrl = normalizeApiUrl(process.env.NEXT_PUBLIC_API_URL);
     const res = await fetch(`${apiUrl}/v1/journey?page_size=50`, {
       next: { revalidate: 60 },
     });

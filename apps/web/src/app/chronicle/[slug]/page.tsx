@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
 import type { ChronicleEntry } from '@connect/types';
+import { normalizeApiUrl } from '@connect/config';
 
 interface PageProps {
   params: Promise<{ slug: string }>;
@@ -10,7 +11,7 @@ interface PageProps {
 
 async function fetchChronicle(slug: string): Promise<ChronicleEntry | null> {
   try {
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+    const apiUrl = normalizeApiUrl(process.env.NEXT_PUBLIC_API_URL);
     const res = await fetch(`${apiUrl}/v1/chronicle/${slug}`, {
       next: { revalidate: 60 },
     });

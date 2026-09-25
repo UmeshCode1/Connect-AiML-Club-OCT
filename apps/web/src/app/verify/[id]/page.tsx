@@ -1,7 +1,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { Card, StatusPill, Button, BrandHeader } from '@connect/ui';
-import { BRAND } from '@connect/config';
+import { BRAND, normalizeApiUrl } from '@connect/config';
 
 interface VerifyPageProps {
   params: Promise<{ id: string }>;
@@ -26,7 +26,7 @@ interface VerificationData {
 // Fallback resolver for public verification client demonstration
 async function getVerificationRecord(id: string): Promise<VerificationData | null> {
   // In production, fetch from process.env.NEXT_PUBLIC_API_URL or direct internal API
-  const apiUrl = process.env.INTERNAL_API_URL || 'http://127.0.0.1:8000';
+  const apiUrl = normalizeApiUrl(process.env.INTERNAL_API_URL || process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000');
   try {
     const res = await fetch(`${apiUrl}/v1/public/certificates/verify/${id}`, {
       next: { revalidate: 60 },

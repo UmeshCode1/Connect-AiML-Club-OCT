@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import type { JourneyMilestone, JourneyMilestoneType, JourneyMilestoneStatus } from '@connect/types';
+import { normalizeApiUrl } from '@connect/config';
 
 export default function JourneyAdminPage() {
   const [milestones, setMilestones] = useState<JourneyMilestone[]>([]);
@@ -24,7 +25,7 @@ export default function JourneyAdminPage() {
   const fetchMilestones = async () => {
     setLoading(true);
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+      const apiUrl = normalizeApiUrl(process.env.NEXT_PUBLIC_API_URL);
       let url = `${apiUrl}/v1/journey?page_size=50`;
       if (typeFilter !== 'ALL') {
         url += `&milestone_type=${typeFilter}`;
@@ -77,7 +78,7 @@ export default function JourneyAdminPage() {
     }
 
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+      const apiUrl = normalizeApiUrl(process.env.NEXT_PUBLIC_API_URL);
       const payload: Record<string, any> = {
         title: newTitle.trim(),
         milestone_date: newDate,
@@ -127,7 +128,7 @@ export default function JourneyAdminPage() {
 
   const handlePublish = async (id: string) => {
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+      const apiUrl = normalizeApiUrl(process.env.NEXT_PUBLIC_API_URL);
       const res = await fetch(`${apiUrl}/v1/journey/${id}/publish`, {
         method: 'POST',
         headers: {

@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import type { ChronicleEntry, ChronicleEditionType, ChronicleStatus } from '@connect/types';
+import { normalizeApiUrl } from '@connect/config';
 
 export default function ChronicleAdminPage() {
   const [entries, setEntries] = useState<ChronicleEntry[]>([]);
@@ -28,7 +29,7 @@ export default function ChronicleAdminPage() {
   const fetchEntries = async () => {
     setLoading(true);
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+      const apiUrl = normalizeApiUrl(process.env.NEXT_PUBLIC_API_URL);
       let url = `${apiUrl}/v1/chronicle?page_size=50`;
       if (statusFilter !== 'ALL') {
         url += `&status=${statusFilter}`;
@@ -83,7 +84,7 @@ export default function ChronicleAdminPage() {
     }
 
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+      const apiUrl = normalizeApiUrl(process.env.NEXT_PUBLIC_API_URL);
       const payload: Record<string, any> = {
         title: newTitle.trim(),
         edition_type: newType,
@@ -128,7 +129,7 @@ export default function ChronicleAdminPage() {
 
   const handleWorkflowAction = async (id: string, action: 'submit-review' | 'approve' | 'publish') => {
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+      const apiUrl = normalizeApiUrl(process.env.NEXT_PUBLIC_API_URL);
       const res = await fetch(`${apiUrl}/v1/chronicle/${id}/${action}`, {
         method: 'POST',
         headers: {
