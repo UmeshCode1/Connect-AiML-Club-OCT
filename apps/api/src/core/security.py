@@ -27,9 +27,11 @@ def check_permission_match(required_action: str, granted_permissions: List[str])
         return True
     
     parts = required_action.split(".")
-    if len(parts) == 2:
+    if len(parts) >= 2:
         module = parts[0]
         if f"{module}.*" in granted_permissions:
+            return True
+        if len(parts) == 3 and f"{parts[0]}.{parts[1]}.*" in granted_permissions:
             return True
             
     return False
