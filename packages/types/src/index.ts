@@ -43,6 +43,8 @@ export type PermissionAction =
   | 'attendance.view'
   | 'attendance.mark'
   | 'attendance.correct'
+  | 'volunteers.view'
+  | 'volunteers.assign'
   | 'media.view'
   | 'media.upload'
   | 'media.process'
@@ -235,22 +237,76 @@ export interface EventRegistrationInput {
 }
 
 
+export type SessionStatus = 'SCHEDULED' | 'LIVE' | 'COMPLETED' | 'CANCELLED';
+
+export interface EventSession {
+  id: string; // uuid
+  event_id: string; // uuid
+  session_code: string; // e.g. SES-APT-01
+  title: string;
+  description?: string;
+  venue?: string;
+  start_at: string;
+  end_at: string;
+  capacity?: number;
+  status: SessionStatus;
+  created_at: string;
+  updated_at: string;
+}
+
 export type AttendanceStatus = 'PRESENT' | 'ABSENT' | 'EXCUSED' | 'LATE' | 'LEFT_EARLY';
+export type AttendanceSource = 'QR' | 'MANUAL' | 'ADMIN' | 'SYSTEM' | 'KIOSK';
 
 export interface AttendanceRecord {
   id: string;
   event_id: string;
+  session_id?: string;
   student_id: string;
   participation_id?: string;
+  student_name?: string;
+  enrollment_number?: string;
   check_in_at?: string;
   check_out_at?: string;
   status: AttendanceStatus;
-  source?: 'QR' | 'MANUAL' | 'KIOSK' | 'AUTO';
+  source?: AttendanceSource;
+  recorded_by?: string;
   corrected_by?: string;
   correction_reason?: string;
   created_at: string;
   updated_at: string;
 }
+
+export interface AttendanceCorrection {
+  attendance_id: string;
+  previous_status: AttendanceStatus;
+  new_status: AttendanceStatus;
+  reason: string;
+  corrected_by: string;
+  timestamp: string;
+}
+
+export type VolunteerRole =
+  | 'ATTENDANCE'
+  | 'REGISTRATION_DESK'
+  | 'SESSION_SUPPORT'
+  | 'MEDIA'
+  | 'GENERAL_OPERATIONS';
+
+export type VolunteerStatus = 'ASSIGNED' | 'CHECKED_IN' | 'COMPLETED' | 'CANCELLED';
+
+export interface VolunteerAssignment {
+  id: string;
+  event_id: string;
+  session_id?: string;
+  student_id: string;
+  student_name?: string;
+  enrollment_number?: string;
+  role: VolunteerRole;
+  assigned_by?: string;
+  status: VolunteerStatus;
+  created_at: string;
+}
+
 
 // -----------------------------------------------------------------------------
 // 4. Media & Storage
