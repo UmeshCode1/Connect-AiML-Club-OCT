@@ -36,6 +36,7 @@ def submit_feedback(
         data=payload,
         student_id=user.account_id,
         student_name=user.email.split("@")[0] if user.email else "Student Participant",
+        student_email=user.email,
     )
     return ApiResponse(data=feedback)
 

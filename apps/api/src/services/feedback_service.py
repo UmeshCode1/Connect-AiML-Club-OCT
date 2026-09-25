@@ -107,6 +107,7 @@ class FeedbackService:
         student_id: str,
         student_name: Optional[str] = None,
         student_enrollment: Optional[str] = None,
+        student_email: Optional[str] = None,
     ) -> FeedbackResponse:
         # 1. Verify canonical event exists
         event = event_service.get_event_by_id(event_id)
@@ -130,11 +131,14 @@ class FeedbackService:
         for p in event_service._participations.values():
             if p["event_id"] == event_id and (
                 p.get("student_id") == student_id
-                or p.get("enrollment_number") == student_enrollment
+                or (student_enrollment and p.get("enrollment_number") == student_enrollment)
+                or (student_email and p.get("email") == student_email)
             ):
                 participation_id = p["id"]
-                if not student_name:
+                if p.get("student_name"):
                     student_name = p.get("student_name")
+                elif not student_name:
+                    student_name = "Student Participant"
                 if not student_enrollment:
                     student_enrollment = p.get("enrollment_number")
                 break

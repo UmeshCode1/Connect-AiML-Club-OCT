@@ -245,7 +245,7 @@ export default async function JourneyTimelinePage() {
                 )}
 
                 {/* External Link if applicable */}
-                {ms.external_link && (
+                {ms.external_link && (ms.external_link.startsWith('http://') || ms.external_link.startsWith('https://')) && (
                   <div style={{ marginTop: '12px' }}>
                     <a
                       href={ms.external_link}

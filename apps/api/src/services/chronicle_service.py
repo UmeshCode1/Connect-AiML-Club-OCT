@@ -127,11 +127,17 @@ class ChronicleService:
         page_size: int = 25,
     ) -> Tuple[List[ChronicleResponse], int]:
         results = []
+        now_iso = _now_iso()
 
         for entry in self._entries.values():
             # If public caller, only PUBLISHED and PUBLIC entries are accessible
             if not is_admin:
                 if entry["status"] != "PUBLISHED" or entry["visibility"] != "PUBLIC":
+                    continue
+                # Scheduled publications must not leak before scheduled time
+                if entry.get("scheduled_at") and entry["scheduled_at"] > now_iso:
+                    continue
+                if entry.get("published_at") and entry["published_at"] > now_iso:
                     continue
             else:
                 if status_filter and entry["status"] != status_filter:
@@ -163,13 +169,25 @@ class ChronicleService:
         return [self._format_entry(e) for e in paged], total
 
     def get_by_slug(self, slug: str, is_admin: bool = False) -> ChronicleResponse:
+        now_iso = _now_iso()
         for entry in self._entries.values():
             if entry["slug"] == slug:
-                if not is_admin and (entry["status"] != "PUBLISHED" or entry["visibility"] != "PUBLIC"):
-                    raise HTTPException(
-                        status_code=status.HTTP_404_NOT_FOUND,
-                        detail="Chronicle publication not found or not publicly available.",
-                    )
+                if not is_admin:
+                    if entry["status"] != "PUBLISHED" or entry["visibility"] != "PUBLIC":
+                        raise HTTPException(
+                            status_code=status.HTTP_404_NOT_FOUND,
+                            detail="Chronicle publication not found or not publicly available.",
+                        )
+                    if entry.get("scheduled_at") and entry["scheduled_at"] > now_iso:
+                        raise HTTPException(
+                            status_code=status.HTTP_404_NOT_FOUND,
+                            detail="Chronicle publication not found or not publicly available.",
+                        )
+                    if entry.get("published_at") and entry["published_at"] > now_iso:
+                        raise HTTPException(
+                            status_code=status.HTTP_404_NOT_FOUND,
+                            detail="Chronicle publication not found or not publicly available.",
+                        )
                 return self._format_entry(entry)
 
         raise HTTPException(
@@ -184,11 +202,23 @@ class ChronicleService:
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail=f"Chronicle publication with ID '{entry_id}' not found.",
             )
-        if not is_admin and (entry["status"] != "PUBLISHED" or entry["visibility"] != "PUBLIC"):
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Chronicle publication not found or not publicly available.",
-            )
+        if not is_admin:
+            now_iso = _now_iso()
+            if entry["status"] != "PUBLISHED" or entry["visibility"] != "PUBLIC":
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail="Chronicle publication not found or not publicly available.",
+                )
+            if entry.get("scheduled_at") and entry["scheduled_at"] > now_iso:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail="Chronicle publication not found or not publicly available.",
+                )
+            if entry.get("published_at") and entry["published_at"] > now_iso:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail="Chronicle publication not found or not publicly available.",
+                )
         return self._format_entry(entry)
 
     def create_entry(self, data: ChronicleCreate, author_id: str) -> ChronicleResponse:

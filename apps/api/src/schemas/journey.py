@@ -1,5 +1,5 @@
 from typing import Optional
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 
 class JourneyMilestoneBase(BaseModel):
@@ -17,6 +17,18 @@ class JourneyMilestoneBase(BaseModel):
     external_link: Optional[str] = None
     visibility: str = Field(default="PUBLIC")
     display_order: int = Field(default=0)
+
+    @field_validator("external_link")
+    @classmethod
+    def validate_external_link(cls, v: Optional[str]) -> Optional[str]:
+        if v is not None:
+            v_clean = v.strip()
+            if not v_clean:
+                return None
+            if not (v_clean.startswith("http://") or v_clean.startswith("https://")):
+                raise ValueError("external_link must be an absolute HTTP or HTTPS URL")
+            return v_clean
+        return None
 
 
 class JourneyMilestoneCreate(JourneyMilestoneBase):
@@ -36,6 +48,18 @@ class JourneyMilestoneUpdate(BaseModel):
     visibility: Optional[str] = None
     status: Optional[str] = None
     display_order: Optional[int] = None
+
+    @field_validator("external_link")
+    @classmethod
+    def validate_external_link(cls, v: Optional[str]) -> Optional[str]:
+        if v is not None:
+            v_clean = v.strip()
+            if not v_clean:
+                return None
+            if not (v_clean.startswith("http://") or v_clean.startswith("https://")):
+                raise ValueError("external_link must be an absolute HTTP or HTTPS URL")
+            return v_clean
+        return None
 
 
 class JourneyMilestoneResponse(JourneyMilestoneBase):
