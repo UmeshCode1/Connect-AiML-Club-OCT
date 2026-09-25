@@ -2,10 +2,10 @@
 # Phase 7 — Knowledge & Innovation Showcase Implementation Plan
 ## Projects, Research, Learning Resources & Authorization-Aware Global Search
 
-**Document Version**: 1.0.0  
-**Status**: APPROVED FOR PLANNING (IMPLEMENTATION PENDING USER AUTHORIZATION)  
+**Document Version**: 1.1.0  
+**Status**: PHASE 7.0 ARCHITECTURE & FOUNDATION COMPLETE (PHASE 7.1 PENDING USER AUTHORIZATION)  
 **Target Release**: `v1.6.0`  
-**Base Release**: `v1.5.0` (Audited Commit `e481eb8`)  
+**Base Release**: `v1.5.0` (Audited Commit `ef5f9f1`)  
 **Production Supabase Reference**: `sslkenwxjqwwzcgafghm` (`Connect-AiML-Club-OCT`)  
 
 ---
@@ -334,12 +334,23 @@ Phase 7.4 — Comprehensive Security Audit, Testing & Production Deployment Gate
 
 ### Milestone Deliverables
 
-#### Milestone 7.0: Schema & Foundation
-- Author forward-only migration `20260925000009_projects_research_learning_search.sql`.
-- Define shared interfaces in `packages/types/src/index.ts`.
-- Add Pydantic v2 schemas in `apps/api/src/schemas/`.
+#### Milestone 7.0: Schema & Foundation — COMPLETED (Commit: Phase 7.0 Gate)
+- **Database Migration 000009**: Author forward-only, idempotent migration `supabase/migrations/20260925000009_projects_research_learning_search.sql`.
+  - Tables: `projects`, `project_members`, `research_items`, `learning_resources`.
+  - Constraints: Status/visibility enums, unique slugs, member composite unique constraint `(project_id, student_id)`, HTTP(S) URL scheme check constraints.
+  - Search Foundation: Native PostgreSQL `pg_trgm` extension and GIN trigram indexes (`idx_projects_trgm`, `idx_research_trgm`, `idx_learning_trgm`).
+  - Row-Level Security: Enabled across all 4 tables; public select restricted to published/public items; project LEAD update policies; staff management via canonical `public.check_user_has_role('SUPER_ADMIN', 'CLUB_ADMIN', 'CONTENT_MANAGER')`.
+  - Clean Architecture: Historical migrations `000001`–`000008` unchanged; no `user_roles` or deprecated role tables referenced.
+- **Shared Domain Types**: Updated `packages/types/src/index.ts` with canonical interfaces (`Project`, `ProjectMember`, `ResearchItem`, `LearningResource`) and payload types.
+- **Pydantic Foundation Schemas**: Implemented `apps/api/src/schemas/knowledge.py` with strict URL scheme sanitization (rejecting `javascript:`, `data:`, `vbscript:`, etc.) and exported in `apps/api/src/schemas/__init__.py`.
+- **Automated Verification Suite**: Authored `apps/api/tests/test_knowledge_foundation.py` (14/14 tests passing).
+- **Validation Gate Results**:
+  - Full Backend Pytest Suite: 114/114 passing (100% pass rate, 0 regressions).
+  - TypeScript Typecheck: 0 errors across all 5 monorepo workspaces.
+  - `@connect/admin` Next.js Production Build: PASS (Exit code 0).
+  - `@connect/web` Next.js Production Build: PASS (Exit code 0).
 
-#### Milestone 7.1: Backend Domain Services & Endpoints
+#### Milestone 7.1: Backend Domain Services & Endpoints — PENDING AUTHORIZATION
 - Implement `apps/api/src/services/project_service.py`.
 - Implement `apps/api/src/services/research_service.py`.
 - Implement `apps/api/src/services/learning_service.py`.
@@ -347,17 +358,17 @@ Phase 7.4 — Comprehensive Security Audit, Testing & Production Deployment Gate
 - Mount endpoints under `/v1/projects`, `/v1/research`, `/v1/learning`, `/v1/search`.
 - Author comprehensive Pytest test suite in `apps/api/tests/test_projects_research_learning.py`.
 
-#### Milestone 7.2: Admin Experience
+#### Milestone 7.2: Admin Experience — PLANNED
 - Build `/projects`, `/research`, `/learning` management interfaces in `@connect/admin`.
 - Enable editorial review, status updates, and member management.
 
-#### Milestone 7.3: Public Showcase & Student Experience
+#### Milestone 7.3: Public Showcase & Student Experience — PLANNED
 - Build `/projects`, `/projects/[slug]` with responsive grid and contributor cards.
 - Build `/research`, `/research/[slug]` academic publication index.
 - Build `/learning`, `/learning/[slug]` open educational resource portal.
 - Implement root layout `<CommandPalette />` (`Ctrl+K`) with authorization-aware search.
 
-#### Milestone 7.4: Verification & Production Release Gate
+#### Milestone 7.4: Verification & Production Release Gate — PLANNED
 - Execute 100% green test suite.
 - Deploy migration `000009` to Supabase production (`sslkenwxjqwwzcgafghm`).
 - Verify live constraints, RLS policies, and SEO metadata.
@@ -372,7 +383,8 @@ Phase 7.4 — Comprehensive Security Audit, Testing & Production Deployment Gate
 | Production Database Status | **READY** | Migration `000008` applied and verified. Zero blockers remain. |
 | Production Project Ref | **CONFIRMED** | `sslkenwxjqwwzcgafghm` (`Connect-AiML-Club-OCT`). |
 | Canonical RBAC | **CONFIRMED** | Canonical `check_user_has_role(...)` active and available. |
-| User Implementation Authorization | **PENDING** | **Strict Stop**: Await formal user instruction and approval to begin Phase 7.0 execution. |
+| Phase 7.0 Foundation | **COMPLETE** | Migration 000009, types, Pydantic schemas, and 14 foundation tests verified. |
+| Phase 7.1 Implementation Authorization | **PENDING** | **Strict Stop**: Await formal user instruction and approval to begin Phase 7.1 execution. |
 
 ---
 

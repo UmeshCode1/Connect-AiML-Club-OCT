@@ -836,4 +836,226 @@ export interface FeedbackSummary {
   rejected_count: number;
 }
 
+// -----------------------------------------------------------------------------
+// 10. Knowledge & Innovation Showcase (Phase 7)
+// -----------------------------------------------------------------------------
+
+// --- Projects ---
+export type ProjectStatus = 'IDEA' | 'IN_DEVELOPMENT' | 'COMPLETED' | 'ARCHIVED';
+
+export type ProjectVisibility = 'PUBLIC' | 'AUTHENTICATED' | 'TEAM_ONLY' | 'HIDDEN';
+
+export type ProjectMemberRole = 'LEAD' | 'CONTRIBUTOR' | 'MENTOR' | 'ADVISOR';
+
+export interface ProjectMember {
+  id: string;
+  project_id: string;
+  student_id: string;
+  role: ProjectMemberRole;
+  display_order: number;
+  created_at: string;
+  student?: {
+    id: string;
+    full_name: string;
+    enrollment_number?: string;
+    avatar_url?: string;
+  };
+}
+
+export interface Project {
+  id: string;
+  title: string;
+  slug: string;
+  summary: string;
+  description: string;
+  status: ProjectStatus;
+  technology_stack: string[];
+  repository_url?: string;
+  demo_url?: string;
+  documentation_url?: string;
+  cover_media_id?: string;
+  cover_media_url?: string;
+  linked_event_id?: string;
+  linked_event_title?: string;
+  linked_event_slug?: string;
+  visibility: ProjectVisibility;
+  is_featured: boolean;
+  created_by?: string;
+  published_at?: string;
+  created_at: string;
+  updated_at: string;
+  members?: ProjectMember[];
+}
+
+export interface ProjectCreatePayload {
+  title: string;
+  slug?: string;
+  summary: string;
+  description: string;
+  status?: ProjectStatus;
+  technology_stack?: string[];
+  repository_url?: string;
+  demo_url?: string;
+  documentation_url?: string;
+  cover_media_id?: string;
+  linked_event_id?: string;
+  visibility?: ProjectVisibility;
+  is_featured?: boolean;
+}
+
+export interface ProjectUpdatePayload {
+  title?: string;
+  slug?: string;
+  summary?: string;
+  description?: string;
+  status?: ProjectStatus;
+  technology_stack?: string[];
+  repository_url?: string;
+  demo_url?: string;
+  documentation_url?: string;
+  cover_media_id?: string;
+  linked_event_id?: string;
+  visibility?: ProjectVisibility;
+  is_featured?: boolean;
+}
+
+export interface ProjectMemberAddPayload {
+  student_id: string;
+  role?: ProjectMemberRole;
+  display_order?: number;
+}
+
+// --- Research ---
+export type ResearchCategory =
+  | 'AI_ML'
+  | 'COMPUTER_VISION'
+  | 'NLP'
+  | 'REINFORCEMENT_LEARNING'
+  | 'GENERATIVE_AI'
+  | 'ROBOTICS'
+  | 'DATA_SCIENCE';
+
+export type ResearchStatus = 'DRAFT' | 'PUBLISHED' | 'ARCHIVED';
+
+export type ResearchVisibility = 'PUBLIC' | 'AUTHENTICATED' | 'HIDDEN';
+
+export interface ResearchAuthor {
+  name: string;
+  enrollment_number?: string;
+  affiliation?: string;
+  role?: string;
+}
+
+export interface ResearchItem {
+  id: string;
+  title: string;
+  slug: string;
+  abstract: string;
+  authors: ResearchAuthor[];
+  category: ResearchCategory;
+  methodology?: string;
+  publication_url?: string;
+  repository_url?: string;
+  dataset_url?: string;
+  linked_event_id?: string;
+  linked_event_title?: string;
+  linked_project_id?: string;
+  linked_project_title?: string;
+  visibility: ResearchVisibility;
+  status: ResearchStatus;
+  created_by?: string;
+  published_at?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ResearchItemCreatePayload {
+  title: string;
+  slug?: string;
+  abstract: string;
+  authors?: ResearchAuthor[];
+  category?: ResearchCategory;
+  methodology?: string;
+  publication_url?: string;
+  repository_url?: string;
+  dataset_url?: string;
+  linked_event_id?: string;
+  linked_project_id?: string;
+  visibility?: ResearchVisibility;
+  status?: ResearchStatus;
+}
+
+export interface ResearchItemUpdatePayload {
+  title?: string;
+  slug?: string;
+  abstract?: string;
+  authors?: ResearchAuthor[];
+  category?: ResearchCategory;
+  methodology?: string;
+  publication_url?: string;
+  repository_url?: string;
+  dataset_url?: string;
+  linked_event_id?: string;
+  linked_project_id?: string;
+  visibility?: ResearchVisibility;
+  status?: ResearchStatus;
+}
+
+// --- Learning Resources ---
+export type LearningResourceType =
+  | 'NOTEBOOK'
+  | 'TUTORIAL'
+  | 'WORKSHOP_MATERIAL'
+  | 'RECORDING'
+  | 'DATASET'
+  | 'SLIDES'
+  | 'DOCUMENTATION';
+
+export type LearningDifficultyLevel = 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED';
+
+export type LearningResourceVisibility = 'PUBLIC' | 'AUTHENTICATED' | 'HIDDEN';
+
+export interface LearningResource {
+  id: string;
+  title: string;
+  slug: string;
+  resource_type: LearningResourceType;
+  difficulty_level: LearningDifficultyLevel;
+  description?: string;
+  url: string;
+  cover_media_id?: string;
+  cover_media_url?: string;
+  linked_event_id?: string;
+  linked_event_title?: string;
+  visibility: LearningResourceVisibility;
+  created_by?: string;
+  published_at?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface LearningResourceCreatePayload {
+  title: string;
+  slug?: string;
+  resource_type: LearningResourceType;
+  difficulty_level?: LearningDifficultyLevel;
+  description?: string;
+  url: string;
+  cover_media_id?: string;
+  linked_event_id?: string;
+  visibility?: LearningResourceVisibility;
+}
+
+export interface LearningResourceUpdatePayload {
+  title?: string;
+  slug?: string;
+  resource_type?: LearningResourceType;
+  difficulty_level?: LearningDifficultyLevel;
+  description?: string;
+  url?: string;
+  cover_media_id?: string;
+  linked_event_id?: string;
+  visibility?: LearningResourceVisibility;
+}
+
 
