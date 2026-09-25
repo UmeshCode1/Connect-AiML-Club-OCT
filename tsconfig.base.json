@@ -1,0 +1,27 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["DOM", "DOM.Iterable", "ES2022"],
+    "allowJs": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "noEmit": true,
+    "esModuleInterop": true,
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "jsx": "react-jsx",
+    "incremental": true,
+    "baseUrl": ".",
+    "paths": {
+      "@connect/types": ["packages/types/src/index.ts"],
+      "@connect/types/*": ["packages/types/src/*"],
+      "@connect/ui": ["packages/ui/src/index.tsx"],
+      "@connect/ui/*": ["packages/ui/src/*"],
+      "@connect/config": ["packages/config/src/index.ts"],
+      "@connect/config/*": ["packages/config/src/*"]
+    }
+  },
+  "exclude": ["node_modules", "**/dist", ".next"]
+}
