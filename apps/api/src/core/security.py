@@ -101,6 +101,87 @@ def get_current_user(
             permissions=["attendance.view", "attendance.mark"],
             event_scopes=["00000000-0000-0000-0000-000000000101"],
         )
+    elif token == "dev-event-manager-token":
+        return AuthenticatedUser(
+            account_id="00000000-0000-0000-0000-000000000004",
+            auth_user_id="auth-event-manager-uuid",
+            email="eventmanager@aimlcluboct.in",
+            role="EVENT_MANAGER",
+            permissions=[
+                "events.view",
+                "events.create",
+                "events.update",
+                "events.publish",
+                "participants.view",
+                "participants.create",
+                "participants.import",
+                "participants.update",
+                "participants.export",
+                "attendance.view",
+                "attendance.mark",
+                "attendance.correct",
+                "volunteers.view",
+                "volunteers.assign",
+                "media.view",
+                "media.upload",
+                "feedback.view",
+            ],
+            event_scopes=["00000000-0000-0000-0000-000000000101"],
+        )
+    elif token == "dev-media-manager-token":
+        return AuthenticatedUser(
+            account_id="00000000-0000-0000-0000-000000000005",
+            auth_user_id="auth-media-manager-uuid",
+            email="mediamanager@aimlcluboct.in",
+            role="MEDIA_MANAGER",
+            permissions=[
+                "events.view",
+                "media.view",
+                "media.upload",
+                "media.process",
+                "media.delete",
+            ],
+            event_scopes=["GLOBAL"],
+        )
+    elif token == "dev-cert-manager-token":
+        return AuthenticatedUser(
+            account_id="00000000-0000-0000-0000-000000000006",
+            auth_user_id="auth-cert-manager-uuid",
+            email="certmanager@aimlcluboct.in",
+            role="CERTIFICATE_MANAGER",
+            permissions=[
+                "events.view",
+                "certificates.view",
+                "certificates.create",
+                "certificates.generate",
+                "certificates.approve",
+                "certificates.issue",
+                "certificates.revoke",
+                "certificates.replace",
+                "certificates.template.manage",
+                "certificates.*",
+            ],
+            event_scopes=["GLOBAL"],
+        )
+    elif token == "dev-content-manager-token":
+        return AuthenticatedUser(
+            account_id="00000000-0000-0000-0000-000000000007",
+            auth_user_id="auth-content-manager-uuid",
+            email="contentmanager@aimlcluboct.in",
+            role="CONTENT_MANAGER",
+            permissions=[
+                "events.view",
+                "events.publish",
+                "feedback.view",
+                "feedback.publish",
+                "chronicle.*",
+                "journey.*",
+                "projects.*",
+                "research.*",
+                "learning.*",
+            ],
+            event_scopes=["GLOBAL"],
+        )
     elif token == "dev-super-token":
         return AuthenticatedUser(
             account_id="00000000-0000-0000-0000-000000000000",
