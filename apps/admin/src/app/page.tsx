@@ -17,9 +17,24 @@ export default function AdminDashboardPage() {
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px' }}>
         <Card style={{ backgroundColor: '#111820', borderColor: '#1E293B', color: '#FFFFFF' }}>
           <h3 style={{ fontSize: '1rem', fontWeight: 600, color: '#38BDF8', marginBottom: '8px' }}>Events & Operations</h3>
-          <p style={{ fontSize: '0.8125rem', color: '#94A3B8', lineHeight: 1.5 }}>
+          <p style={{ fontSize: '0.8125rem', color: '#94A3B8', lineHeight: 1.5, marginBottom: '14px' }}>
             Manage lifecycle, registrations, Google Drive folders, and participants across assigned events.
           </p>
+          <a
+            href="/events"
+            style={{
+              display: 'inline-block',
+              backgroundColor: '#014B7A',
+              color: '#FFFFFF',
+              padding: '6px 14px',
+              borderRadius: '6px',
+              fontSize: '0.8rem',
+              fontWeight: 600,
+              textDecoration: 'none',
+            }}
+          >
+            Launch Event Manager →
+          </a>
         </Card>
 
         <Card style={{ backgroundColor: '#111820', borderColor: '#1E293B', color: '#FFFFFF' }}>
