@@ -49,6 +49,10 @@ export type PermissionAction =
   | 'media.upload'
   | 'media.process'
   | 'media.delete'
+  | 'face_enrollment.view'
+  | 'face_embedding.delete'
+  | 'face.search'
+  | 'face.dispute'
   | 'certificates.view'
   | 'certificates.generate'
   | 'certificates.issue'
@@ -411,3 +415,71 @@ export interface ApiErrorDetail {
 export interface ApiErrorResponse {
   error: ApiErrorDetail;
 }
+
+// -----------------------------------------------------------------------------
+// 7. Media Intelligence & Biometric Privacy (Phase 4)
+// -----------------------------------------------------------------------------
+
+export type ProcessingJobType = 'THUMBNAIL_GENERATION' | 'FACE_DETECTION' | 'KEYFRAME_SAMPLING';
+export type ProcessingJobStatus = 'QUEUED' | 'PROCESSING' | 'COMPLETED' | 'FAILED';
+
+export interface MediaProcessingJob {
+  id: string;
+  media_asset_id: string;
+  job_type: ProcessingJobType;
+  status: ProcessingJobStatus;
+  attempts: number;
+  started_at?: string;
+  completed_at?: string;
+  error_message?: string;
+  metadata?: Record<string, any>;
+  created_at: string;
+}
+
+export type FaceConsentStatus = 'ACTIVE' | 'WITHDRAWN' | 'EXPIRED' | 'DELETED';
+
+export interface FaceEnrollment {
+  id: string;
+  student_id: string;
+  consent_version: string;
+  consented_at: string;
+  withdrawn_at?: string;
+  status: FaceConsentStatus;
+  model_version?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface MediaFaceMatch {
+  id: string;
+  media_asset_id: string;
+  matched_student_id?: string;
+  confidence?: number;
+  detection_quality?: number;
+  bounding_box?: {
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+  };
+  model_version?: string;
+  created_at: string;
+}
+
+export type FaceReportType = 'NOT_ME' | 'WRONG_PERSON' | 'UNCONSENTED_INDEX' | 'POOR_CROP';
+export type FaceReportStatus = 'OPEN' | 'RESOLVED_DISPUTED' | 'DISMISSED';
+
+export interface FaceMatchReport {
+  id: string;
+  student_id: string;
+  media_asset_id: string;
+  media_face_id?: string;
+  report_type: FaceReportType;
+  description?: string;
+  status: FaceReportStatus;
+  reviewed_by?: string;
+  reviewed_at?: string;
+  resolution_notes?: string;
+  created_at: string;
+}
+
