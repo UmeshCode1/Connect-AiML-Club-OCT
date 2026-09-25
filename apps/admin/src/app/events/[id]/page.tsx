@@ -165,6 +165,23 @@ export default function EventDetailPage({ params }: { params: Promise<{ id: stri
               Media Assets
             </Link>
             <Link
+              href={`/events/${resolvedParams.id}/certificates`}
+              style={{
+                backgroundColor: '#014B7A',
+                color: '#FFFFFF',
+                padding: '8px 16px',
+                borderRadius: '6px',
+                fontSize: '0.875rem',
+                fontWeight: 600,
+                textDecoration: 'none',
+                minHeight: '44px',
+                display: 'inline-flex',
+                alignItems: 'center',
+              }}
+            >
+              Certificates & Verification
+            </Link>
+            <Link
               href={`/events/${resolvedParams.id}/participants`}
               style={{
                 backgroundColor: '#1E293B',
