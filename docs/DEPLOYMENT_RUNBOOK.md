@@ -158,37 +158,35 @@ az containerapp create \
 
 ### 3. Vercel Project A: Student/Member Web App (`apps/web`)
 
-1. **Dashboard Configuration**:
-   - Add New Project $\rightarrow$ Link `Connect-AiML-Club-OCT`
-   - **Project Name**: `connect-web`
+1. **Dashboard / CLI Configuration**:
+   - Linked to `Connect-AiML-Club-OCT`
+   - **Project Name**: `connect-aimlclub-web`
    - **Framework**: `Next.js`
-   - **Root Directory**: `apps/web` (Enable *"Include files outside Root Directory"*)
+   - **Root Directory**: `apps/web`
 2. **Domain Configuration**:
-   - Settings $\rightarrow$ Domains $\rightarrow$ Add `app.aimlcluboct.in`.
+   - `app.aimlcluboct.in` $\rightarrow$ Aliased & Active.
 3. **Environment Variables**:
    - `NEXT_PUBLIC_APP_URL`: `https://app.aimlcluboct.in`
-   - `NEXT_PUBLIC_API_URL`: `https://api.aimlcluboct.in`
+   - `NEXT_PUBLIC_API_URL`: `https://aca-connect-api.agreeablesand-79215911.centralindia.azurecontainerapps.io`
    - `NEXT_PUBLIC_MAIN_SITE_URL`: `https://aimlcluboct.in`
    - `NEXT_PUBLIC_SUPABASE_URL`: `https://sslkenwxjqwwzcgafghm.supabase.co`
-   - `NEXT_PUBLIC_SUPABASE_ANON_KEY`: `<SUPABASE_ANON_KEY>`
 
 ---
 
 ### 4. Vercel Project B: Admin Management Portal (`apps/admin`)
 
-1. **Dashboard Configuration**:
-   - Add New Project $\rightarrow$ Link `Connect-AiML-Club-OCT`
-   - **Project Name**: `connect-admin`
+1. **Dashboard / CLI Configuration**:
+   - Linked to `Connect-AiML-Club-OCT`
+   - **Project Name**: `connect-aimlclub-admin`
    - **Framework**: `Next.js`
-   - **Root Directory**: `apps/admin` (Enable *"Include files outside Root Directory"*)
+   - **Root Directory**: `apps/admin`
 2. **Domain Configuration**:
-   - Settings $\rightarrow$ Domains $\rightarrow$ Add `admin.aimlcluboct.in`.
+   - `admin.aimlcluboct.in` $\rightarrow$ Aliased & Active.
 3. **Environment Variables**:
    - `NEXT_PUBLIC_APP_URL`: `https://admin.aimlcluboct.in`
-   - `NEXT_PUBLIC_API_URL`: `https://api.aimlcluboct.in`
+   - `NEXT_PUBLIC_API_URL`: `https://aca-connect-api.agreeablesand-79215911.centralindia.azurecontainerapps.io`
    - `NEXT_PUBLIC_MAIN_SITE_URL`: `https://aimlcluboct.in`
    - `NEXT_PUBLIC_SUPABASE_URL`: `https://sslkenwxjqwwzcgafghm.supabase.co`
-   - `NEXT_PUBLIC_SUPABASE_ANON_KEY`: `<SUPABASE_ANON_KEY>`
 
 ---
 
@@ -196,16 +194,18 @@ az containerapp create \
 
 - **URL**: `https://aimlcluboct.in`
 - **Rule**: Must always serve the existing website project. Never redirect to `app` or `admin`.
-- **Verification**: `curl -I https://aimlcluboct.in` $\rightarrow$ `HTTP 200 OK`.
+- **Verification**: `curl -I https://aimlcluboct.in` $\rightarrow$ `HTTP 200 OK` (Verified).
 
 ---
 
-### 6. Post-Deployment Verification Checklist
+### 6. Post-Deployment Verification Checklist (All Verified Live)
 
-Once services are provisioned:
-1. `GET https://api.aimlcluboct.in/health` $\rightarrow$ `200 OK`
-2. `GET https://app.aimlcluboct.in/projects` $\rightarrow$ `200 OK` (renders project gallery)
-3. `GET https://app.aimlcluboct.in/research` $\rightarrow$ `200 OK` (renders research catalog)
-4. `GET https://app.aimlcluboct.in/learning` $\rightarrow$ `200 OK` (renders learning resources)
-5. `GET https://app.aimlcluboct.in` $\rightarrow$ Press `Ctrl+K` $\rightarrow$ Global search queries `https://api.aimlcluboct.in/v1/search`
-6. `GET https://aimlcluboct.in` $\rightarrow$ `200 OK` (confirms original public site remains untouched)
+1. `GET https://aca-connect-api.agreeablesand-79215911.centralindia.azurecontainerapps.io/health` $\rightarrow$ `200 OK` (Verified)
+2. `GET https://app.aimlcluboct.in` $\rightarrow$ `200 OK` (Verified)
+3. `GET https://app.aimlcluboct.in/projects` $\rightarrow$ `200 OK` (Verified)
+4. `GET https://app.aimlcluboct.in/research` $\rightarrow$ `200 OK` (Verified)
+5. `GET https://app.aimlcluboct.in/learning` $\rightarrow$ `200 OK` (Verified)
+6. `GET https://app.aimlcluboct.in/events` $\rightarrow$ `200 OK` (Verified)
+7. `GET https://admin.aimlcluboct.in` $\rightarrow$ `200 OK` (Verified)
+8. `GET https://aimlcluboct.in` $\rightarrow$ `200 OK` (Confirms original public site remains untouched)
+9. `GET https://social.aimlcluboct.in` & `https://voice.aimlcluboct.in` $\rightarrow$ `200 OK` (Existing subdomains untouched)
