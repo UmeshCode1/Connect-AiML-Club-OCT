@@ -4,6 +4,8 @@ import type { Metadata } from 'next';
 import type { ChronicleEntry } from '@connect/types';
 import { normalizeApiUrl } from '@connect/config';
 
+export const dynamic = 'force-dynamic';
+
 export const metadata: Metadata = {
   title: 'Chronicle — AIML CLUB OCT',
   description: 'Official publications, research digests, monthly editorial updates, and symposium recaps from AI & Machine Learning Club, Oriental College of Technology Bhopal.',

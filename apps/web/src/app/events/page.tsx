@@ -3,6 +3,8 @@ import type { Metadata } from 'next';
 import { normalizeApiUrl } from '@connect/config';
 import EventsClient, { EventItem } from './EventsClient';
 
+export const dynamic = 'force-dynamic';
+
 export const metadata: Metadata = {
   title: 'Events & Symposiums — AIML CLUB OCT',
   description:

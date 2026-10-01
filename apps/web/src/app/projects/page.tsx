@@ -4,6 +4,8 @@ import { normalizeApiUrl } from '@connect/config';
 import type { Project } from '@connect/types';
 import ProjectsClient from './ProjectsClient';
 
+export const dynamic = 'force-dynamic';
+
 export const metadata: Metadata = {
   title: 'Projects & Innovation Showcase — AIML CLUB OCT',
   description:

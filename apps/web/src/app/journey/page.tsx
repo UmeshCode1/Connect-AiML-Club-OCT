@@ -4,6 +4,8 @@ import type { Metadata } from 'next';
 import type { JourneyMilestone } from '@connect/types';
 import { normalizeApiUrl } from '@connect/config';
 
+export const dynamic = 'force-dynamic';
+
 export const metadata: Metadata = {
   title: 'Institutional Journey & Timeline — AIML CLUB OCT',
   description: 'Historical milestones, achievements, inaugurations, and institutional collaborations of the AI & Machine Learning Club, Oriental College of Technology Bhopal.',

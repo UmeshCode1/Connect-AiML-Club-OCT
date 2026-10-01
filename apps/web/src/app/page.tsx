@@ -5,6 +5,8 @@ import { BRAND, normalizeApiUrl } from '@connect/config';
 import { Card, Button, StatusBadge, EmptyState } from '@connect/ui';
 import type { Project, ResearchItem, LearningResource, JourneyMilestone } from '@connect/types';
 
+export const dynamic = 'force-dynamic';
+
 export const metadata: Metadata = {
   title: 'AIML CLUB OCT — CONNECT | Digital Infrastructure & Student Ecosystem',
   description:

@@ -4,6 +4,8 @@ import { normalizeApiUrl } from '@connect/config';
 import type { LearningResource } from '@connect/types';
 import LearningClient from './LearningClient';
 
+export const dynamic = 'force-dynamic';
+
 export const metadata: Metadata = {
   title: 'Open Learning Resources & Labs — AIML CLUB OCT',
   description:

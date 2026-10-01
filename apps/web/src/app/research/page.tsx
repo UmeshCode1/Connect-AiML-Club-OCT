@@ -4,6 +4,8 @@ import { normalizeApiUrl } from '@connect/config';
 import type { ResearchItem } from '@connect/types';
 import ResearchClient from './ResearchClient';
 
+export const dynamic = 'force-dynamic';
+
 export const metadata: Metadata = {
   title: 'Academic Research & Pre-prints — AIML CLUB OCT',
   description:
