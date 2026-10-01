@@ -350,22 +350,42 @@ Phase 7.4 — Comprehensive Security Audit, Testing & Production Deployment Gate
   - `@connect/admin` Next.js Production Build: PASS (Exit code 0).
   - `@connect/web` Next.js Production Build: PASS (Exit code 0).
 
-#### Milestone 7.1: Backend Domain Services & Endpoints — COMPLETED
+#### Milestone 7.1: Backend Domain Services & Endpoints — COMPLETED & ARCHITECTURALLY CORRECTED
 - **Domain Services Implemented**:
   - `apps/api/src/services/project_service.py`: Project lifecycle state machine (`IDEA` → `IN_DEVELOPMENT` → `COMPLETED` → `ARCHIVED`), member attribution, IDOR protection, safe HTTP(S) URL validation.
   - `apps/api/src/services/research_service.py`: Academic research registry, draft isolation, author permission bounds, publication workflow.
   - `apps/api/src/services/learning_service.py`: Open educational resource catalog, type & difficulty tier filters, event association.
-  - `apps/api/src/services/search_service.py`: Unified authorization-aware search across 8 domains (Events, Projects, Research, Learning, Chronicle, Journey, Team, Certificates) with native PostgreSQL trigram similarity simulation (`gin_trgm_ops`).
+  - `apps/api/src/services/search_service.py`: Unified authorization-aware search across 8 domains (Events, Projects, Research, Learning, Chronicle, Journey, Team, Certificates).
+- **Search Architecture Correction (Native PostgreSQL pg_trgm Engine)**:
+  - *Previous Implementation*: The initial draft emulated PostgreSQL trigram calculations in Python using n-gram extraction and Jaccard similarity coefficients over in-memory dictionaries.
+  - *Correction Rationale*: Replaced Python simulation with native database-backed PostgreSQL search to leverage the actual `pg_trgm` extension and GIN indexes (`idx_events_title_trgm`, `idx_projects_trgm`, `idx_research_trgm`, `idx_learning_trgm`) established in database migrations.
+  - *PostgreSQL Mechanism*:
+    - Direct connection via `psycopg` (v3).
+    - Database operators: `%` (similarity threshold match) and `ILIKE` (GIN-accelerated pattern match via `gin_trgm_ops`).
+    - Database ranking function: `similarity(column, %(q)s)`.
+    - Authorization-aware SQL: Server-side RBAC boundaries are embedded directly in SQL `WHERE` clauses (e.g. `visibility = 'PUBLIC' AND status = 'PUBLISHED'` or `created_by = ...`), ensuring unauthorized records are filtered at the database level without Python-side leakage.
+    - Zero Python trigram simulation: In offline environments without `DATABASE_URL`, fallback query execution uses direct case-insensitive keyword matching without calculating n-grams or Jaccard coefficients in Python.
+  - *Index Verification & EXPLAIN Analysis*:
+    - Verified on linked PostgreSQL database (`sslkenwxjqwwzcgafghm`).
+    - Querying `events` with `title % 'Symposium' OR title ILIKE '%Symposium%'` confirmed:
+      - `Bitmap Index Scan on idx_events_title_trgm` (Index Cond: `title % 'Symposium'::text`).
+      - `Index Scan using idx_events_status_visibility on events`.
+    - Performance observation: The PostgreSQL cost-based optimizer switches between Seq Scan for small tables (<10 rows) and GIN Index Scan for larger datasets.
+  - *Security Verification*:
+    - IDOR protection: Private drafts/internal ideas cannot be accessed or discovered without proper authorization.
+    - Public certificate search restriction: Public callers cannot enumerate student names or view arbitrary certificates; discovery is strictly limited to exact certificate ID match (`UPPER(certificate_id) = %(q_upper)s`).
+    - Student data protection: Results never leak student phone numbers, email addresses, enrollment numbers, or auth secrets.
 - **REST Endpoints Mounted**:
   - Mounted under `/v1/projects`, `/v1/research`, `/v1/learning`, `/v1/search` in `apps/api/src/api/v1/router.py`.
   - Exposes 72 verified OpenAPI paths at `/docs`.
 - **Automated Verification Suite**:
-  - Authored `apps/api/tests/test_projects_research_learning.py` (29 comprehensive integration & security tests).
+  - `apps/api/tests/test_projects_research_learning.py` expanded with 38 comprehensive domain and search tests.
 - **Validation Gate Results**:
-  - Full Backend Pytest Suite: 143/143 passing (100% pass rate, 0 regressions).
+  - Full Backend Pytest Suite: 152/152 passing (100% pass rate, 0 regressions).
   - TypeScript Typecheck: 0 errors across all 5 monorepo workspaces (`@connect/admin`, `@connect/web`, `@connect/config`, `@connect/types`, `@connect/ui`).
   - `@connect/admin` Next.js Production Build: PASS (Exit code 0).
   - `@connect/web` Next.js Production Build: PASS (Exit code 0).
+  - OpenAPI Schema Validation: PASS (72 routes registered).
 
 #### Milestone 7.2: Admin Experience — PENDING AUTHORIZATION
 - Build `/projects`, `/research`, `/learning` management interfaces in `@connect/admin`.

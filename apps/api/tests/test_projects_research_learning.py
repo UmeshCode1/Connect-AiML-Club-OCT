@@ -452,3 +452,217 @@ def test_authenticated_student_search_includes_own_drafts():
     assert res.status_code == 200
     results = res.json()["data"]
     assert any(r["slug"] == "federated-learning-student-assessment" for r in results)
+
+
+def test_search_projects_by_title_and_summary():
+    """Search matches projects across title and summary text."""
+    # 1. Project title search
+    res_title = client.get("/v1/search?q=vision&type=projects")
+    assert res_title.status_code == 200
+    data_title = res_title.json()["data"]
+    assert len(data_title) >= 1
+    assert any("vision" in p["title"].lower() for p in data_title)
+
+    # 2. Project summary search (e.g. 'jetson' in Project 1 summary)
+    res_summary = client.get("/v1/search?q=jetson&type=projects")
+    assert res_summary.status_code == 200
+    data_summary = res_summary.json()["data"]
+    assert len(data_summary) >= 1
+    assert any("jetson" in (p["description"] or "").lower() for p in data_summary)
+
+
+def test_search_research_by_title_and_abstract():
+    """Search matches research items across title and abstract text."""
+    # 1. Research title search
+    res_title = client.get("/v1/search?q=edge&type=research")
+    assert res_title.status_code == 200
+    data_title = res_title.json()["data"]
+    assert len(data_title) >= 1
+    assert any("edge" in r["title"].lower() for r in data_title)
+
+    # 2. Research abstract search (e.g. 'quantization' or 'embedded')
+    res_abs = client.get("/v1/search?q=quantization&type=research")
+    assert res_abs.status_code == 200
+    data_abs = res_abs.json()["data"]
+    assert len(data_abs) >= 1
+    assert any("quantization" in r["description"].lower() for r in data_abs)
+
+
+def test_search_learning_by_title_and_description():
+    """Search matches learning resources by title and description."""
+    # Title match
+    res = client.get("/v1/search?q=pytorch&type=learning")
+    assert res.status_code == 200
+    items = res.json()["data"]
+    assert len(items) >= 1
+    assert any("pytorch" in r["title"].lower() for r in items)
+
+    # Description match
+    res_desc = client.get("/v1/search?q=optimization&type=learning")
+    assert res_desc.status_code == 200
+    assert len(res_desc.json()["data"]) >= 1
+
+
+def test_search_all_domain_entity_filters():
+    """Verifies type filtering for every supported domain."""
+    domains = ["events", "projects", "research", "learning", "chronicle", "journey", "team", "certificates"]
+    for d in domains:
+        q = "aptify" if d != "certificates" else "AIML26-APT-000184"
+        res = client.get(f"/v1/search?q={q}&type={d}")
+        assert res.status_code == 200
+        for item in res.json()["data"]:
+            expected_type = d.rstrip("s") if d != "chronicle" and d != "journey" and d != "team" else d
+            if d == "certificates":
+                expected_type = "certificate"
+            elif d == "projects":
+                expected_type = "project"
+            elif d == "events":
+                expected_type = "event"
+            assert item["entity_type"] == expected_type
+
+
+def test_search_private_project_isolation():
+    """Public search never reveals private/internal project existence."""
+    # 'club-neural-hardware-farm' has visibility='TEAM_ONLY' / status='IDEA'
+    res = client.get("/v1/search?q=hardware")
+    assert res.status_code == 200
+    results = res.json()["data"]
+    # Must NOT contain the internal hardware farm project
+    assert not any(r["slug"] == "club-neural-hardware-farm" for r in results)
+
+    # Staff can find it
+    staff_res = client.get("/v1/search?q=hardware", headers=ADMIN_HEADERS)
+    assert staff_res.status_code == 200
+    assert any(r["slug"] == "club-neural-hardware-farm" for r in staff_res.json()["data"])
+
+
+def test_search_hidden_learning_resource_isolation():
+    """Hidden learning resources are strictly excluded from public search."""
+    from apps.api.src.services.learning_service import learning_service
+
+    # Create a hidden learning resource
+    hidden_lr = {
+        "id": "lr-hidden-test-001",
+        "title": "Secret Internal Infrastructure Setup",
+        "slug": "secret-internal-infra-setup",
+        "resource_type": "DOCUMENTATION",
+        "difficulty_level": "ADVANCED",
+        "description": "Internal credentials and setup instructions for club nodes.",
+        "url": "https://docs.aimlcluboct.in/internal",
+        "visibility": "HIDDEN",
+        "created_by": "acc-admin-001",
+        "created_at": "2026-09-25T00:00:00Z",
+        "updated_at": "2026-09-25T00:00:00Z",
+    }
+    learning_service._resources["lr-hidden-test-001"] = hidden_lr
+
+    try:
+        # Public search must not find it
+        pub_res = client.get("/v1/search?q=secret&type=learning")
+        assert pub_res.status_code == 200
+        assert not any(r["slug"] == "secret-internal-infra-setup" for r in pub_res.json()["data"])
+
+        # Staff can find it
+        staff_res = client.get("/v1/search?q=secret&type=learning", headers=ADMIN_HEADERS)
+        assert staff_res.status_code == 200
+        assert any(r["slug"] == "secret-internal-infra-setup" for r in staff_res.json()["data"])
+    finally:
+        learning_service._resources.pop("lr-hidden-test-001", None)
+
+
+def test_search_no_student_metadata_leakage():
+    """Public search results never expose private student contact information."""
+    res = client.get("/v1/search?q=aptify")
+    assert res.status_code == 200
+    for item in res.json()["data"]:
+        # Verify no sensitive contact fields in metadata
+        meta = item.get("metadata") or {}
+        assert "phone" not in meta
+        assert "email" not in meta
+        assert "password" not in meta
+        assert "jwt" not in meta
+        assert "auth_token" not in meta
+
+
+def test_postgres_query_builder_contracts():
+    """Verifies PostgreSQL query generator adheres to pg_trgm operators and RBAC boundaries."""
+    from apps.api.src.core.security import AuthenticatedUser
+    from apps.api.src.services.search_service import search_service
+
+    # 1. Projects query (public)
+    sql, params = search_service.build_postgres_query("projects", "vision", is_admin=False)
+    assert "FROM projects" in sql
+    assert "similarity(title, %(q)s)" in sql
+    assert "similarity(summary, %(q)s)" in sql
+    assert "visibility = 'PUBLIC'" in sql
+    assert "IN ('IN_DEVELOPMENT', 'COMPLETED')" in sql
+    assert "q" in params
+    assert "like_q" in params
+
+    # 2. Projects query (authenticated student)
+    user = AuthenticatedUser(
+        account_id="acc-student-001",
+        auth_user_id="auth-student-001",
+        email="student@aimlcluboct.in",
+        role="STUDENT",
+        permissions=["projects.read"],
+    )
+    sql_student, params_student = search_service.build_postgres_query("projects", "vision", is_admin=False, current_user=user)
+    assert "created_by::text = %(account_id)s" in sql_student
+    assert "project_members" in sql_student
+    assert params_student["account_id"] == "acc-student-001"
+
+    # 3. Research query (public vs admin)
+    sql_res_pub, _ = search_service.build_postgres_query("research", "neural", is_admin=False)
+    assert "visibility = 'PUBLIC' AND status = 'PUBLISHED'" in sql_res_pub
+    assert "similarity(abstract, %(q)s)" in sql_res_pub
+
+    sql_res_admin, _ = search_service.build_postgres_query("research", "neural", is_admin=True)
+    assert "1=1" in sql_res_admin
+
+    # 4. Certificates query (public strict exact match)
+    sql_cert_pub, params_cert = search_service.build_postgres_query("certificates", "aiml26-apt-000184", is_admin=False)
+    assert "UPPER(certificate_id) = %(q_upper)s" in sql_cert_pub
+    assert params_cert["q_upper"] == "AIML26-APT-000184"
+
+
+def test_postgres_search_execution_row_mapping():
+    """Verifies execute_postgres_search properly parses PostgreSQL rows returned via psycopg."""
+    from unittest.mock import MagicMock, patch
+    from apps.api.src.services.search_service import SearchService
+
+    mock_db_service = SearchService(database_url="postgresql://test:test@localhost:5432/testdb")
+
+    fake_project_rows = [
+        {
+            "id": "00000000-0000-0000-0000-000000000901",
+            "title": "OCT Vision AI",
+            "description": "Smart Campus Edge Surveillance",
+            "slug": "oct-vision-ai",
+            "status": "COMPLETED",
+            "technology_stack": ["Python", "FastAPI"],
+            "is_featured": True,
+            "score": 0.88,
+        }
+    ]
+
+    mock_cursor = MagicMock()
+    mock_cursor.fetchall.return_value = fake_project_rows
+    mock_cursor.__enter__.return_value = mock_cursor
+
+    mock_conn = MagicMock()
+    mock_conn.cursor.return_value = mock_cursor
+    mock_conn.__enter__.return_value = mock_conn
+
+    with patch("psycopg.connect", return_value=mock_conn):
+        items = mock_db_service.execute_postgres_search("projects", "vision", is_admin=False)
+        assert items is not None
+        assert len(items) == 1
+        assert items[0].title == "OCT Vision AI"
+        assert items[0].entity_type == "project"
+        assert items[0].url == "/projects/oct-vision-ai"
+        assert items[0].score == 0.88
+        assert items[0].metadata["status"] == "COMPLETED"
+
+
+
