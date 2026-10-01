@@ -427,3 +427,32 @@ class LearningResourceResponse(LearningResourceBase):
     linked_event_title: Optional[str] = None
     created_at: str
     updated_at: str
+
+
+# ------------------------------------------------------------------------------
+# 4. Unified Search Schemas
+# ------------------------------------------------------------------------------
+
+VALID_SEARCH_ENTITY_TYPES = {
+    "ALL",
+    "EVENTS",
+    "PROJECTS",
+    "RESEARCH",
+    "LEARNING",
+    "CHRONICLE",
+    "JOURNEY",
+    "TEAM",
+    "CERTIFICATES",
+}
+
+
+class SearchItemResponse(BaseModel):
+    id: str
+    entity_type: str
+    title: str
+    description: Optional[str] = None
+    slug: Optional[str] = None
+    url: Optional[str] = None
+    score: Optional[float] = None
+    metadata: Optional[dict] = None
+

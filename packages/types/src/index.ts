@@ -1058,4 +1058,28 @@ export interface LearningResourceUpdatePayload {
   visibility?: LearningResourceVisibility;
 }
 
+// --- Unified Search Foundation ---
+export type SearchEntityType =
+  | 'all'
+  | 'events'
+  | 'projects'
+  | 'research'
+  | 'learning'
+  | 'chronicle'
+  | 'journey'
+  | 'team'
+  | 'certificates';
+
+export interface SearchResultItem {
+  id: string;
+  entity_type: string;
+  title: string;
+  description?: string;
+  slug?: string;
+  url?: string;
+  score?: number;
+  metadata?: Record<string, any>;
+}
+
+
 

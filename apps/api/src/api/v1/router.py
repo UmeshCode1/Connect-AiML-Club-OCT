@@ -11,6 +11,10 @@ from apps.api.src.api.v1.endpoints import (
     chronicle,
     journey,
     feedback,
+    projects,
+    research,
+    learning,
+    search,
 )
 
 api_router = APIRouter()
@@ -26,6 +30,11 @@ api_router.include_router(media.router)
 api_router.include_router(chronicle.router)
 api_router.include_router(journey.router)
 api_router.include_router(feedback.router)
+api_router.include_router(projects.router)
+api_router.include_router(research.router)
+api_router.include_router(learning.router)
+api_router.include_router(search.router)
+
 
 
 

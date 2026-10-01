@@ -2,8 +2,8 @@
 # Phase 7 — Knowledge & Innovation Showcase Implementation Plan
 ## Projects, Research, Learning Resources & Authorization-Aware Global Search
 
-**Document Version**: 1.1.0  
-**Status**: PHASE 7.0 ARCHITECTURE & FOUNDATION COMPLETE (PHASE 7.1 PENDING USER AUTHORIZATION)  
+**Document Version**: 1.2.0  
+**Status**: PHASE 7.1 BACKEND DOMAIN SERVICES & ENDPOINTS COMPLETE (PHASE 7.2 PENDING USER AUTHORIZATION)  
 **Target Release**: `v1.6.0`  
 **Base Release**: `v1.5.0` (Audited Commit `ef5f9f1`)  
 **Production Supabase Reference**: `sslkenwxjqwwzcgafghm` (`Connect-AiML-Club-OCT`)  
@@ -350,15 +350,24 @@ Phase 7.4 — Comprehensive Security Audit, Testing & Production Deployment Gate
   - `@connect/admin` Next.js Production Build: PASS (Exit code 0).
   - `@connect/web` Next.js Production Build: PASS (Exit code 0).
 
-#### Milestone 7.1: Backend Domain Services & Endpoints — PENDING AUTHORIZATION
-- Implement `apps/api/src/services/project_service.py`.
-- Implement `apps/api/src/services/research_service.py`.
-- Implement `apps/api/src/services/learning_service.py`.
-- Implement `apps/api/src/services/search_service.py`.
-- Mount endpoints under `/v1/projects`, `/v1/research`, `/v1/learning`, `/v1/search`.
-- Author comprehensive Pytest test suite in `apps/api/tests/test_projects_research_learning.py`.
+#### Milestone 7.1: Backend Domain Services & Endpoints — COMPLETED
+- **Domain Services Implemented**:
+  - `apps/api/src/services/project_service.py`: Project lifecycle state machine (`IDEA` → `IN_DEVELOPMENT` → `COMPLETED` → `ARCHIVED`), member attribution, IDOR protection, safe HTTP(S) URL validation.
+  - `apps/api/src/services/research_service.py`: Academic research registry, draft isolation, author permission bounds, publication workflow.
+  - `apps/api/src/services/learning_service.py`: Open educational resource catalog, type & difficulty tier filters, event association.
+  - `apps/api/src/services/search_service.py`: Unified authorization-aware search across 8 domains (Events, Projects, Research, Learning, Chronicle, Journey, Team, Certificates) with native PostgreSQL trigram similarity simulation (`gin_trgm_ops`).
+- **REST Endpoints Mounted**:
+  - Mounted under `/v1/projects`, `/v1/research`, `/v1/learning`, `/v1/search` in `apps/api/src/api/v1/router.py`.
+  - Exposes 72 verified OpenAPI paths at `/docs`.
+- **Automated Verification Suite**:
+  - Authored `apps/api/tests/test_projects_research_learning.py` (29 comprehensive integration & security tests).
+- **Validation Gate Results**:
+  - Full Backend Pytest Suite: 143/143 passing (100% pass rate, 0 regressions).
+  - TypeScript Typecheck: 0 errors across all 5 monorepo workspaces (`@connect/admin`, `@connect/web`, `@connect/config`, `@connect/types`, `@connect/ui`).
+  - `@connect/admin` Next.js Production Build: PASS (Exit code 0).
+  - `@connect/web` Next.js Production Build: PASS (Exit code 0).
 
-#### Milestone 7.2: Admin Experience — PLANNED
+#### Milestone 7.2: Admin Experience — PENDING AUTHORIZATION
 - Build `/projects`, `/research`, `/learning` management interfaces in `@connect/admin`.
 - Enable editorial review, status updates, and member management.
 
@@ -384,7 +393,9 @@ Phase 7.4 — Comprehensive Security Audit, Testing & Production Deployment Gate
 | Production Project Ref | **CONFIRMED** | `sslkenwxjqwwzcgafghm` (`Connect-AiML-Club-OCT`). |
 | Canonical RBAC | **CONFIRMED** | Canonical `check_user_has_role(...)` active and available. |
 | Phase 7.0 Foundation | **COMPLETE** | Migration 000009, types, Pydantic schemas, and 14 foundation tests verified. |
-| Phase 7.1 Implementation Authorization | **PENDING** | **Strict Stop**: Await formal user instruction and approval to begin Phase 7.1 execution. |
+| Phase 7.1 Backend Services | **COMPLETE** | 4 domain services, 4 endpoint routers, 29 tests verified (143/143 passing). |
+| Phase 7.2 Implementation Authorization | **PENDING** | **Strict Stop**: Await formal user instruction and approval to begin Phase 7.2 execution. |
+
 
 ---
 

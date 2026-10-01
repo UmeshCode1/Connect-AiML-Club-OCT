@@ -80,7 +80,9 @@ def get_current_user(
                 "chronicle.*",
                 "journey.*",
                 "feedback.*",
-                "projects.*"
+                "projects.*",
+                "research.*",
+                "learning.*",
             ],
             event_scopes=["GLOBAL"],
         )
