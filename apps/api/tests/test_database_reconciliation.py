@@ -15,7 +15,7 @@ MIGRATIONS_DIR = os.path.join(os.path.dirname(__file__), "..", "..", "..", "supa
 
 def test_migration_chain_sequence():
     """
-    Verifies that migrations 000001 through 000006 exist in exact sequence.
+    Verifies that migrations 000001 through 000009 exist in exact sequence.
     """
     expected_migrations = [
         "20260925000001_initial_schema.sql",
@@ -24,6 +24,9 @@ def test_migration_chain_sequence():
         "20260925000004_media_intelligence.sql",
         "20260925000005_certificate_engine.sql",
         "20260925000006_database_foundation_reconciliation.sql",
+        "20260925000007_chronicle_journey_feedback.sql",
+        "20260925000008_volunteer_assignments_constraint.sql",
+        "20260925000009_projects_research_learning_search.sql",
     ]
     for filename in expected_migrations:
         path = os.path.join(MIGRATIONS_DIR, filename)
