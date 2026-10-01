@@ -3,50 +3,29 @@
 import React, { useState, use } from 'react';
 import Link from 'next/link';
 
+import { normalizeApiUrl } from '@connect/config';
+
 interface EventDetail {
   id: string;
   event_code: string;
   slug: string;
   title: string;
-  short_description: string;
-  description: string;
+  short_description?: string;
+  description?: string;
   event_type: string;
   status: string;
   visibility: string;
-  venue: string;
-  capacity: number;
-  confirmed_count: number;
-  waitlisted_count: number;
-  cancelled_count: number;
+  venue?: string;
+  capacity?: number;
+  confirmed_count?: number;
+  waitlisted_count?: number;
+  cancelled_count?: number;
   start_at: string;
   end_at: string;
-  registration_open_at: string;
-  registration_close_at: string;
+  registration_open_at?: string;
+  registration_close_at?: string;
   published_at?: string;
 }
-
-const SAMPLE_DETAIL: EventDetail = {
-  id: '00000000-0000-0000-0000-000000000101',
-  event_code: 'EVT-APTIFY-2026',
-  slug: 'aptify-2026',
-  title: 'Aptify 2.0: AI Symposium',
-  short_description: 'Flagship AI symposium and workshop at Oriental College of Technology.',
-  description:
-    'Comprehensive student symposium featuring AI keynote speakers, workshops, code sprints, and verified participation credentials.',
-  event_type: 'SYMPOSIUM',
-  status: 'REGISTRATION_OPEN',
-  visibility: 'PUBLIC',
-  venue: 'Auditorium, Oriental College of Technology, Bhopal',
-  capacity: 250,
-  confirmed_count: 142,
-  waitlisted_count: 12,
-  cancelled_count: 3,
-  start_at: '2026-10-15T09:30:00Z',
-  end_at: '2026-10-15T17:00:00Z',
-  registration_open_at: '2026-09-01T00:00:00Z',
-  registration_close_at: '2026-10-14T23:59:59Z',
-  published_at: '2026-09-01T00:00:00Z',
-};
 
 const ALLOWED_TRANSITIONS: Record<string, string[]> = {
   DRAFT: ['PLANNING', 'ARCHIVED'],
@@ -62,10 +41,57 @@ const ALLOWED_TRANSITIONS: Record<string, string[]> = {
 
 export default function EventDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = use(params);
-  const [event, setEvent] = useState<EventDetail>(SAMPLE_DETAIL);
+  const [event, setEvent] = useState<EventDetail | null>(null);
+  const [loading, setLoading] = useState(true);
   const [selectedTargetStatus, setSelectedTargetStatus] = useState<string | null>(null);
   const [transitionReason, setTransitionReason] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
+
+  React.useEffect(() => {
+    async function loadEvent() {
+      setLoading(true);
+      try {
+        const apiUrl = normalizeApiUrl(process.env.NEXT_PUBLIC_API_URL);
+        const res = await fetch(`${apiUrl}/v1/events/${resolvedParams.id}`, {
+          headers: { Authorization: 'Bearer dev-admin-token' },
+        });
+        if (res.ok) {
+          const body = await res.json();
+          setEvent(body.data);
+        } else {
+          setEvent(null);
+        }
+      } catch (err) {
+        console.error('Failed to fetch event details in admin:', err);
+        setEvent(null);
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadEvent();
+  }, [resolvedParams.id]);
+
+  if (loading) {
+    return (
+      <div style={{ padding: '40px 0', textAlign: 'center', color: '#94A3B8' }}>
+        Loading operational event records...
+      </div>
+    );
+  }
+
+  if (!event) {
+    return (
+      <div style={{ padding: '40px 0', textAlign: 'center' }}>
+        <p style={{ color: '#F87171', fontSize: '1.1rem', fontWeight: 600 }}>Event not found</p>
+        <p style={{ color: '#94A3B8', fontSize: '0.9rem', marginTop: '6px' }}>
+          The requested event record does not exist or has been permanently removed.
+        </p>
+        <Link href="/events" style={{ color: '#38BDF8', fontSize: '0.875rem', marginTop: '16px', display: 'inline-block' }}>
+          ← Back to Events Roster
+        </Link>
+      </div>
+    );
+  }
 
   const availableTransitions = ALLOWED_TRANSITIONS[event.status] || [];
 
@@ -73,7 +99,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ id: stri
     if (!selectedTargetStatus) return;
     setIsProcessing(true);
     setTimeout(() => {
-      setEvent((prev) => ({ ...prev, status: selectedTargetStatus }));
+      setEvent((prev) => (prev ? { ...prev, status: selectedTargetStatus } : null));
       setSelectedTargetStatus(null);
       setTransitionReason('');
       setIsProcessing(false);
@@ -224,31 +250,31 @@ export default function EventDetailPage({ params }: { params: Promise<{ id: stri
       {/* KPI Stats */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px', marginBottom: '24px' }}>
         <div style={{ backgroundColor: '#111820', border: '1px solid #1E293B', borderRadius: '8px', padding: '16px' }}>
-          <div style={{ color: '#94A3B8', fontSize: '0.8rem', fontWeight: 600 }}>CAPACITY UTILIZATION</div>
+          <div style={{ color: '#94A3B8', fontSize: '0.8rem', fontWeight: 600 }}>CAPACITY</div>
           <div style={{ fontSize: '1.75rem', fontWeight: 800, color: '#F8FAFC', marginTop: '4px' }}>
-            {Math.round((event.confirmed_count / event.capacity) * 100)}%
+            {event.capacity ? `${event.capacity}` : 'Unlimited'}
           </div>
           <div style={{ color: '#64748B', fontSize: '0.8rem', marginTop: '2px' }}>
-            {event.confirmed_count} / {event.capacity} seats filled
+            {event.confirmed_count !== undefined ? `${event.confirmed_count} confirmed attendees` : 'Capacity limit configured'}
           </div>
         </div>
         <div style={{ backgroundColor: '#111820', border: '1px solid #1E293B', borderRadius: '8px', padding: '16px' }}>
-          <div style={{ color: '#94A3B8', fontSize: '0.8rem', fontWeight: 600 }}>WAITLISTED</div>
-          <div style={{ fontSize: '1.75rem', fontWeight: 800, color: '#F59E0B', marginTop: '4px' }}>
-            {event.waitlisted_count}
+          <div style={{ color: '#94A3B8', fontSize: '0.8rem', fontWeight: 600 }}>EVENT TYPE</div>
+          <div style={{ fontSize: '1.75rem', fontWeight: 800, color: '#38BDF8', marginTop: '4px' }}>
+            {event.event_type}
           </div>
-          <div style={{ color: '#64748B', fontSize: '0.8rem', marginTop: '2px' }}>Auto-promoted upon cancellation</div>
+          <div style={{ color: '#64748B', fontSize: '0.8rem', marginTop: '2px' }}>Official Chapter Program</div>
         </div>
         <div style={{ backgroundColor: '#111820', border: '1px solid #1E293B', borderRadius: '8px', padding: '16px' }}>
-          <div style={{ color: '#94A3B8', fontSize: '0.8rem', fontWeight: 600 }}>CANCELLED</div>
-          <div style={{ fontSize: '1.75rem', fontWeight: 800, color: '#EF4444', marginTop: '4px' }}>
-            {event.cancelled_count}
+          <div style={{ color: '#94A3B8', fontSize: '0.8rem', fontWeight: 600 }}>STATUS</div>
+          <div style={{ fontSize: '1.75rem', fontWeight: 800, color: '#10B981', marginTop: '4px' }}>
+            {event.status}
           </div>
-          <div style={{ color: '#64748B', fontSize: '0.8rem', marginTop: '2px' }}>Released back to waitlist</div>
+          <div style={{ color: '#64748B', fontSize: '0.8rem', marginTop: '2px' }}>Lifecycle state</div>
         </div>
         <div style={{ backgroundColor: '#111820', border: '1px solid #1E293B', borderRadius: '8px', padding: '16px' }}>
           <div style={{ color: '#94A3B8', fontSize: '0.8rem', fontWeight: 600 }}>VISIBILITY</div>
-          <div style={{ fontSize: '1.75rem', fontWeight: 800, color: '#38BDF8', marginTop: '4px' }}>
+          <div style={{ fontSize: '1.75rem', fontWeight: 800, color: '#F8FAFC', marginTop: '4px' }}>
             {event.visibility}
           </div>
           <div style={{ color: '#64748B', fontSize: '0.8rem', marginTop: '2px' }}>Public Student PWA</div>
@@ -260,26 +286,26 @@ export default function EventDetailPage({ params }: { params: Promise<{ id: stri
         {/* Left Column: Details */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
           <div style={{ backgroundColor: '#111820', border: '1px solid #1E293B', borderRadius: '8px', padding: '20px' }}>
-            <h2 style={{ fontSize: '1.1rem', fontWeight: 600, color: '#F8FAFC', marginBottom: '14px' }}>Overview & Details</h2>
+            <h2 style={{ fontSize: '1.1rem', fontWeight: 600, color: '#F8FAFC', marginBottom: '14px' }}>Overview &amp; Details</h2>
             <p style={{ color: '#CBD5E1', fontSize: '0.95rem', lineHeight: 1.6, marginBottom: '16px' }}>
-              {event.description}
+              {event.description || event.short_description || 'No description provided.'}
             </p>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', fontSize: '0.875rem' }}>
               <div>
                 <span style={{ color: '#64748B' }}>Venue: </span>
-                <span style={{ color: '#F8FAFC', fontWeight: 500 }}>{event.venue}</span>
+                <span style={{ color: '#F8FAFC', fontWeight: 500 }}>{event.venue || 'TBA'}</span>
               </div>
               <div>
                 <span style={{ color: '#64748B' }}>Event Date: </span>
-                <span style={{ color: '#F8FAFC', fontWeight: 500 }}>{event.start_at.slice(0, 10)}</span>
+                <span style={{ color: '#F8FAFC', fontWeight: 500 }}>{event.start_at ? event.start_at.slice(0, 10) : '—'}</span>
               </div>
               <div>
                 <span style={{ color: '#64748B' }}>Registration Opens: </span>
-                <span style={{ color: '#F8FAFC', fontWeight: 500 }}>{event.registration_open_at.slice(0, 10)}</span>
+                <span style={{ color: '#F8FAFC', fontWeight: 500 }}>{event.registration_open_at ? event.registration_open_at.slice(0, 10) : '—'}</span>
               </div>
               <div>
                 <span style={{ color: '#64748B' }}>Registration Closes: </span>
-                <span style={{ color: '#F8FAFC', fontWeight: 500 }}>{event.registration_close_at.slice(0, 10)}</span>
+                <span style={{ color: '#F8FAFC', fontWeight: 500 }}>{event.registration_close_at ? event.registration_close_at.slice(0, 10) : '—'}</span>
               </div>
             </div>
           </div>

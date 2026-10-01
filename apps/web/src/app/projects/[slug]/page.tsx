@@ -10,92 +10,6 @@ interface PageProps {
   params: Promise<{ slug: string }>;
 }
 
-const SEED_DETAIL_PROJECTS: Record<string, Project> = {
-  'oct-vision-ai-campus': {
-    id: '00000000-0000-0000-0000-000000000901',
-    title: 'OCT Vision AI: Smart Campus Surveillance',
-    slug: 'oct-vision-ai-campus',
-    summary: 'Edge-computed real-time student safety and campus monitoring using YOLOv8 and Jetson nano nodes.',
-    description: `Comprehensive vision AI platform deployed at Oriental College of Technology, detecting safety anomalies and parking congestion using local neural edge inferencing.
-
-### Problem Statement
-Campus environments require proactive safety monitoring and crowd management without streaming sensitive high-resolution video feeds off-campus to commercial cloud providers.
-
-### Proposed Architecture & Solution
-We designed a decentralized neural edge compute topology utilizing NVIDIA Jetson Nano nodes running TensorRT-optimized YOLOv8 models directly on local RTSP streams. Only non-personally identifiable bounding-box telemetry is forwarded to the central campus dashboard.`,
-    status: 'COMPLETED',
-    technology_stack: ['Python', 'PyTorch', 'YOLOv8', 'OpenCV', 'FastAPI', 'TensorRT'],
-    repository_url: 'https://github.com/aimlcluboct/oct-vision-ai',
-    demo_url: 'https://vision.aimlcluboct.in',
-    documentation_url: 'https://docs.aimlcluboct.in/projects/vision-ai',
-    linked_event_id: '00000000-0000-0000-0000-000000000101',
-    linked_event_title: 'Aptify 2.0: AI Symposium',
-    linked_event_slug: 'aptify-2026',
-    visibility: 'PUBLIC',
-    is_featured: true,
-    created_at: '2026-02-01T09:00:00Z',
-    updated_at: '2026-03-10T10:00:00Z',
-    published_at: '2026-03-10T10:00:00Z',
-    members: [
-      {
-        id: 'm1',
-        project_id: '00000000-0000-0000-0000-000000000901',
-        student_id: 's1',
-        role: 'LEAD',
-        display_order: 0,
-        created_at: '2026-02-01T09:00:00Z',
-        student_full_name: 'Aman Sharma',
-      },
-      {
-        id: 'm2',
-        project_id: '00000000-0000-0000-0000-000000000901',
-        student_id: 's3',
-        role: 'CONTRIBUTOR',
-        display_order: 1,
-        created_at: '2026-02-05T10:00:00Z',
-        student_full_name: 'Priya Patel',
-      },
-    ],
-  },
-  'aptify-recommendation-engine': {
-    id: '00000000-0000-0000-0000-000000000902',
-    title: 'Aptify Recommendation Engine',
-    slug: 'aptify-recommendation-engine',
-    summary: 'Graph-based hybrid workshop and session recommendation engine for Aptify symposium participants.',
-    description: `Collaborative filtering and LLM semantic embeddings engine personalizing workshop schedules according to student skill level.
-
-### Problem Statement
-Students attending large multi-track symposiums often experience schedule paralysis when attempting to choose between parallel AI, data science, and web engineering tracks.
-
-### Solution
-A vector-similarity recommendation service matching participant interests, declared skill proficiencies, and workshop difficulty tiers using pgvector embeddings.`,
-    status: 'IN_DEVELOPMENT',
-    technology_stack: ['Python', 'FastAPI', 'PostgreSQL', 'pgvector', 'Docker'],
-    repository_url: 'https://github.com/aimlcluboct/aptify-recs',
-    demo_url: undefined,
-    documentation_url: undefined,
-    linked_event_id: '00000000-0000-0000-0000-000000000101',
-    linked_event_title: 'Aptify 2.0: AI Symposium',
-    linked_event_slug: 'aptify-2026',
-    visibility: 'PUBLIC',
-    is_featured: false,
-    created_at: '2026-09-01T10:00:00Z',
-    updated_at: '2026-09-15T12:00:00Z',
-    published_at: '2026-09-15T12:00:00Z',
-    members: [
-      {
-        id: 'm3',
-        project_id: '00000000-0000-0000-0000-000000000902',
-        student_id: 's2',
-        role: 'LEAD',
-        display_order: 0,
-        created_at: '2026-09-01T10:00:00Z',
-        student_full_name: 'Student Member',
-      },
-    ],
-  },
-};
-
 async function fetchProject(slug: string): Promise<Project | null> {
   try {
     const apiUrl = normalizeApiUrl(process.env.NEXT_PUBLIC_API_URL);
@@ -105,19 +19,17 @@ async function fetchProject(slug: string): Promise<Project | null> {
     if (res.ok) {
       const data = await res.json();
       const project: Project = data.data;
+      if (!project) return null;
       // Guardrail: Never expose draft or non-public projects to public view
       if (project.visibility !== 'PUBLIC' || project.status === 'IDEA' || project.status === 'ARCHIVED') {
         return null;
       }
       return project;
     }
-  } catch {
-    // Offline fallback for known seed projects during static build
-    if (SEED_DETAIL_PROJECTS[slug]) {
-      return SEED_DETAIL_PROJECTS[slug];
-    }
+  } catch (err) {
+    console.error('Failed to fetch project detail from API:', err);
   }
-  return SEED_DETAIL_PROJECTS[slug] || null;
+  return null;
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {

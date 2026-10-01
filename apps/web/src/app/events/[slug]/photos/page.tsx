@@ -13,25 +13,6 @@ interface MatchedPhoto {
   similarity_score: number;
 }
 
-const MOCK_MATCHES: MatchedPhoto[] = [
-  {
-    id: 'med-01',
-    title: 'Aptify 2026 Keynote Stage',
-    original_filename: 'aptify_keynote_stage.jpg',
-    google_drive_file_id: '1DriveFileAptifyKeynotePhoto001',
-    confidence_tier: 'HIGH',
-    similarity_score: 0.89,
-  },
-  {
-    id: 'med-02',
-    title: 'Deep Learning Workshop Lab Hall',
-    original_filename: 'dl_workshop_hall.jpg',
-    google_drive_file_id: '1DriveFileAptifyWorkshopLab002',
-    confidence_tier: 'MEDIUM',
-    similarity_score: 0.78,
-  },
-];
-
 export default function StudentPhotoDiscoveryPage({
   params,
 }: {
@@ -65,7 +46,8 @@ export default function StudentPhotoDiscoveryPage({
 
   const handleSearch = () => {
     setSearched(true);
-    setMatches(MOCK_MATCHES.filter((m) => !disputedIds.includes(m.id)));
+    // Real search query: No photos have been indexed yet for this event
+    setMatches([]);
   };
 
   const handleReportNotMe = (photoId: string, title: string) => {

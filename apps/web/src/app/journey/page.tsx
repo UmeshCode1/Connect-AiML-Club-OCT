@@ -13,6 +13,8 @@ export const metadata: Metadata = {
   },
 };
 
+import { EmptyState, StatusBadge } from '@connect/ui';
+
 async function getMilestones(): Promise<JourneyMilestone[]> {
   try {
     const apiUrl = normalizeApiUrl(process.env.NEXT_PUBLIC_API_URL);
@@ -23,44 +25,11 @@ async function getMilestones(): Promise<JourneyMilestone[]> {
       const data = await res.json();
       return data.data || [];
     }
-  } catch {
-    // Offline fallback for build
+  } catch (err) {
+    console.error('Failed to fetch journey milestones from API:', err);
   }
 
-  return [
-    {
-      id: '00000000-0000-0000-0000-000000000801',
-      title: 'Foundation of AI & ML Club, Oriental College of Technology',
-      slug: 'foundation-of-aiml-club-oct',
-      milestone_date: '2024-08-15',
-      milestone_type: 'FOUNDATION',
-      description: 'Establishment of the dedicated AI & Machine Learning student chapter at Oriental College of Technology, Bhopal under the leadership of student coordinators and institutional faculty advisors.',
-      external_link: 'https://aimlcluboct.in',
-      visibility: 'PUBLIC',
-      status: 'PUBLISHED',
-      display_order: 0,
-      published_at: '2024-08-15T12:00:00Z',
-      created_at: '2024-08-15T12:00:00Z',
-      updated_at: '2024-08-15T12:00:00Z',
-    },
-    {
-      id: '00000000-0000-0000-0000-000000000802',
-      title: 'Inauguration of Aptify AI Symposium Series',
-      slug: 'inauguration-of-aptify-series',
-      milestone_date: '2025-02-20',
-      milestone_type: 'EVENT',
-      description: 'Launch of the flagship technical symposium uniting students, faculty, and industry professionals in AI engineering, computer vision, and machine learning research tracks.',
-      linked_event_id: '00000000-0000-0000-0000-000000000101',
-      linked_event_title: 'Aptify 2.0: AI Symposium',
-      linked_event_slug: 'aptify-2026',
-      visibility: 'PUBLIC',
-      status: 'PUBLISHED',
-      display_order: 1,
-      published_at: '2025-02-20T10:00:00Z',
-      created_at: '2025-02-20T10:00:00Z',
-      updated_at: '2025-02-20T10:00:00Z',
-    },
-  ];
+  return [];
 }
 
 export default async function JourneyTimelinePage() {
@@ -110,16 +79,12 @@ export default async function JourneyTimelinePage() {
 
       {/* Timeline Stream */}
       {milestones.length === 0 ? (
-        <div style={{
-          textAlign: 'center',
-          padding: '60px 20px',
-          backgroundColor: '#F8FAFC',
-          borderRadius: '8px',
-          border: '1px solid #E2E8F0',
-          color: '#64748B',
-        }}>
-          No historical milestones recorded yet.
-        </div>
+        <EmptyState
+          title="No milestones published yet"
+          description="Institutional milestones, symposium inaugurations, and community partnerships will appear here as they are officially recorded."
+          actionText="Explore Events"
+          actionHref="/events"
+        />
       ) : (
         <div style={{
           position: 'relative',

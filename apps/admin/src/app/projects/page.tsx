@@ -18,58 +18,7 @@ const VISIBILITY_COLORS: Record<ProjectVisibility, { bg: string; text: string }>
   TEAM_ONLY: { bg: '#78350F33', text: '#FDE68A' },
   HIDDEN: { bg: '#33415533', text: '#CBD5E1' },
 };
-
-const SAMPLE_PROJECTS: Project[] = [
-  {
-    id: '00000000-0000-0000-0000-000000000901',
-    title: 'OCT Vision AI: Smart Campus Surveillance',
-    slug: 'oct-vision-ai-campus',
-    summary: 'Edge-computed real-time student safety and campus monitoring using YOLOv8 and Jetson nano nodes.',
-    description: 'Comprehensive vision AI platform deployed at Oriental College of Technology, detecting safety anomalies and parking congestion using local neural edge inferencing.',
-    status: 'COMPLETED',
-    technology_stack: ['Python', 'PyTorch', 'YOLOv8', 'OpenCV', 'FastAPI'],
-    repository_url: 'https://github.com/aimlcluboct/oct-vision-ai',
-    demo_url: 'https://vision.aimlcluboct.in',
-    documentation_url: 'https://docs.aimlcluboct.in/projects/vision-ai',
-    linked_event_id: '00000000-0000-0000-0000-000000000101',
-    linked_event_title: 'Aptify 2.0: AI Symposium',
-    visibility: 'PUBLIC',
-    is_featured: true,
-    published_at: '2026-03-10T10:00:00Z',
-    created_at: '2026-02-01T09:00:00Z',
-    updated_at: '2026-03-10T10:00:00Z',
-  },
-  {
-    id: '00000000-0000-0000-0000-000000000902',
-    title: 'Aptify Recommendation Engine',
-    slug: 'aptify-recommendation-engine',
-    summary: 'Graph-based hybrid workshop and session recommendation engine for Aptify symposium participants.',
-    description: 'Collaborative filtering and LLM semantic embeddings engine personalizing workshop schedules according to student skill level.',
-    status: 'IN_DEVELOPMENT',
-    technology_stack: ['Python', 'FastAPI', 'PostgreSQL', 'pgvector'],
-    repository_url: 'https://github.com/aimlcluboct/aptify-recs',
-    linked_event_id: '00000000-0000-0000-0000-000000000101',
-    linked_event_title: 'Aptify 2.0: AI Symposium',
-    visibility: 'PUBLIC',
-    is_featured: false,
-    published_at: '2026-09-15T12:00:00Z',
-    created_at: '2026-09-01T10:00:00Z',
-    updated_at: '2026-09-15T12:00:00Z',
-  },
-  {
-    id: '00000000-0000-0000-0000-000000000903',
-    title: 'Club Neural Hardware Farm',
-    slug: 'club-neural-hardware-farm',
-    summary: 'Internal distributed cluster orchestration across lab workstations.',
-    description: 'Internal infrastructure scheduling student neural network training jobs across idle college computer lab nodes during off-hours.',
-    status: 'IDEA',
-    technology_stack: ['Python', 'Docker', 'Slurm', 'WireGuard'],
-    visibility: 'TEAM_ONLY',
-    is_featured: false,
-    created_at: '2026-09-20T14:00:00Z',
-    updated_at: '2026-09-20T14:00:00Z',
-  },
-];
+// Real API records only - no mock data
 
 export default function ProjectsAdminPage() {
   const [projects, setProjects] = useState<Project[]>([]);
@@ -122,11 +71,11 @@ export default function ProjectsAdminPage() {
         const body = await res.json();
         setProjects(body.data || []);
       } else {
-        setProjects(SAMPLE_PROJECTS);
+        setProjects([]);
       }
-    } catch {
-      // Fallback sample data if API server is offline
-      setProjects(SAMPLE_PROJECTS);
+    } catch (err) {
+      console.error('Failed to fetch projects in admin:', err);
+      setProjects([]);
     } finally {
       setLoading(false);
     }

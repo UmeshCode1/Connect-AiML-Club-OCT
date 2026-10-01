@@ -40,39 +40,10 @@ export default function EventFeedbackAdminPage() {
         const sumBody = await sumRes.json();
         setSummary(sumBody.data);
       }
-    } catch {
-      // Fallback data for build or offline mock
-      setFeedbacks([
-        {
-          id: '00000000-0000-0000-0000-000000000901',
-          event_id: eventId,
-          student_id: '00000000-0000-0000-0000-000000000011',
-          source: 'PORTAL',
-          rating: 5,
-          feedback_text: 'The computer vision hands-on session was exceptionally structured and practical!',
-          suggestion_text: 'Would love an advanced multi-modal agent track in the next workshop.',
-          publication_consent: 'PUBLIC_NAME',
-          is_anonymous: false,
-          moderation_status: 'APPROVED',
-          visibility: 'PUBLIC',
-          student: {
-            id: '00000000-0000-0000-0000-000000000011',
-            full_name: 'Aarav Sharma',
-            enrollment_number: '0126AL221001',
-          },
-          created_at: '2026-03-01T17:00:00Z',
-          updated_at: '2026-03-02T10:00:00Z',
-        },
-      ]);
-      setSummary({
-        event_id: eventId,
-        total_feedback: 1,
-        average_rating: 5.0,
-        rating_distribution: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 1 },
-        pending_moderation_count: 0,
-        approved_count: 1,
-        rejected_count: 0,
-      });
+    } catch (err) {
+      console.error('Failed to fetch event feedback in admin:', err);
+      setFeedbacks([]);
+      setSummary(null);
     } finally {
       setLoading(false);
     }

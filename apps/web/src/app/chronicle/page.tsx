@@ -13,6 +13,8 @@ export const metadata: Metadata = {
   },
 };
 
+import { EmptyState, StatusBadge } from '@connect/ui';
+
 async function getChronicles(): Promise<ChronicleEntry[]> {
   try {
     const apiUrl = normalizeApiUrl(process.env.NEXT_PUBLIC_API_URL);
@@ -23,35 +25,11 @@ async function getChronicles(): Promise<ChronicleEntry[]> {
       const data = await res.json();
       return data.data || [];
     }
-  } catch {
-    // Graceful fallback for offline build
+  } catch (err) {
+    console.error('Failed to fetch chronicles from API:', err);
   }
 
-  return [
-    {
-      id: '00000000-0000-0000-0000-000000000701',
-      title: 'Welcome to AIML Club Chronicle: Academic Year 2026',
-      slug: 'welcome-to-aiml-club-chronicle-2026',
-      edition_type: 'INSTITUTIONAL_ANNOUNCEMENT',
-      excerpt: 'Official inaugurative edition of AIML CLUB OCT Chronicle covering key milestones, upcoming symposiums, and student research tracks.',
-      content: '# Welcome to AIML Club Chronicle\n\nInnovate. Implement. Inspire.\n\nWe are pleased to introduce the official digital chronicle of AIML CLUB OCT.',
-      visibility: 'PUBLIC',
-      status: 'PUBLISHED',
-      published_at: '2026-03-01T10:00:00Z',
-      created_at: '2026-03-01T09:00:00Z',
-      updated_at: '2026-03-01T10:00:00Z',
-      linked_events: [
-        {
-          id: 'item-1',
-          chronicle_id: '00000000-0000-0000-0000-000000000701',
-          event_id: '00000000-0000-0000-0000-000000000101',
-          display_order: 0,
-          event_title: 'Aptify 2.0: AI Symposium',
-          event_slug: 'aptify-2026',
-        },
-      ],
-    },
-  ];
+  return [];
 }
 
 export default async function ChronicleIndexPage() {
@@ -95,22 +73,18 @@ export default async function ChronicleIndexPage() {
           margin: 0,
           lineHeight: '1.6',
         }}>
-          The official periodical publication of the AI & Machine Learning Club, Oriental College of Technology Bhopal. Exploring academic research, engineering highlights, and student achievements.
+          The official periodical publication of the AI &amp; Machine Learning Club, Oriental College of Technology Bhopal. Exploring academic research, engineering highlights, and student achievements.
         </p>
       </div>
 
       {/* Publications Stream */}
       {entries.length === 0 ? (
-        <div style={{
-          textAlign: 'center',
-          padding: '60px 20px',
-          backgroundColor: '#F8FAFC',
-          borderRadius: '8px',
-          border: '1px solid #E2E8F0',
-          color: '#64748B',
-        }}>
-          No published Chronicle editions available at this time.
-        </div>
+        <EmptyState
+          title="No Chronicle entries published yet"
+          description="Official periodicals, research digests, and symposium recaps will appear here once published by the editorial team."
+          actionText="Explore Events"
+          actionHref="/events"
+        />
       ) : (
         <div style={{
           display: 'grid',

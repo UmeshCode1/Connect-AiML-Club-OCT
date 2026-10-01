@@ -87,6 +87,7 @@ export function HeaderNav() {
 
         {/* Desktop Nav Links */}
         <nav
+          className="desktop-only"
           aria-label="Main Navigation"
           style={{
             display: 'flex',

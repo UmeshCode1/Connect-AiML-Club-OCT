@@ -36,22 +36,8 @@ async function getVerificationRecord(id: string): Promise<VerificationData | nul
     }
     const json = await res.json();
     return json.data || null;
-  } catch {
-    // Graceful offline fallback for smoke check id
-    if (id === 'AIML26-APT-000184') {
-      return {
-        valid: true,
-        certificate_id: 'AIML26-APT-000184',
-        recipient_name: 'Priya Sharma',
-        event: 'Aptify 2.0: AI Symposium',
-        event_title: 'Aptify 2.0: AI Symposium',
-        event_date: 'October 15, 2026',
-        certificate_type: 'PARTICIPATION',
-        issued_at: '2026-10-15T18:30:00Z',
-        status: 'ISSUED',
-        verification_url: 'https://aimlcluboct.in/verify/AIML26-APT-000184',
-      };
-    }
+  } catch (err) {
+    console.error('Failed to fetch certificate verification from API:', err);
     return null;
   }
 }

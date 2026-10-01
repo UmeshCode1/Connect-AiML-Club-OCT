@@ -19,38 +19,8 @@ async function fetchChronicle(slug: string): Promise<ChronicleEntry | null> {
       const data = await res.json();
       return data.data;
     }
-  } catch {
-    // Offline fallback for known seed slug
-    if (slug === 'welcome-to-aiml-club-chronicle-2026') {
-      return {
-        id: '00000000-0000-0000-0000-000000000701',
-        title: 'Welcome to AIML Club Chronicle: Academic Year 2026',
-        slug: 'welcome-to-aiml-club-chronicle-2026',
-        edition_type: 'INSTITUTIONAL_ANNOUNCEMENT',
-        excerpt: 'Official inaugurative edition of AIML CLUB OCT Chronicle covering key milestones, upcoming symposiums, and student research tracks.',
-        content: '# Welcome to AIML Club Chronicle\n\nInnovate. Implement. Inspire.\n\nWe are pleased to introduce the official digital chronicle of AIML CLUB OCT, designed to archive scholarly activities, project highlights, and symposium proceedings.',
-        visibility: 'PUBLIC',
-        status: 'PUBLISHED',
-        published_at: '2026-03-01T10:00:00Z',
-        created_at: '2026-03-01T09:00:00Z',
-        updated_at: '2026-03-01T10:00:00Z',
-        seo_title: 'Welcome to AIML Club Chronicle — 2026 Edition',
-        seo_description: 'Inaugurative editorial edition from AI & Machine Learning Club, Oriental College of Technology Bhopal.',
-        linked_events: [
-          {
-            id: 'item-1',
-            chronicle_id: '00000000-0000-0000-0000-000000000701',
-            event_id: '00000000-0000-0000-0000-000000000101',
-            display_order: 0,
-            event_title: 'Aptify 2.0: AI Symposium',
-            event_slug: 'aptify-2026',
-            event_type: 'WORKSHOP',
-            start_at: '2026-10-15T09:30:00Z',
-            venue: 'Auditorium, Oriental College of Technology, Bhopal',
-          },
-        ],
-      };
-    }
+  } catch (err) {
+    console.error('Failed to fetch chronicle entry from API:', err);
   }
   return null;
 }

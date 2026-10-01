@@ -20,52 +20,8 @@ const STATUS_BADGES: Record<ResearchStatus, { bg: string; text: string; border: 
   PUBLISHED: { bg: '#064E3B22', text: '#6EE7B7', border: '#10B981' },
   ARCHIVED: { bg: '#18181B55', text: '#94A3B8', border: '#475569' },
 };
+// Real API records only
 
-const SAMPLE_RESEARCH: ResearchItem[] = [
-  {
-    id: '00000000-0000-0000-0000-000000000801',
-    title: 'Edge-Optimized Neural Networks for Campus Surveillance: A YOLOv8 Quantization Study',
-    slug: 'edge-optimized-neural-networks-campus',
-    abstract:
-      'Investigation into INT8 and FP16 quantization benchmarks for YOLOv8 object detection on edge devices deployed in institutional university campus topologies.',
-    methodology: 'Empirical bench-testing on Jetson Nano and Coral Edge TPU nodes with synthetic and real camera stream feeds.',
-    authors: [
-      { name: 'Dr. Faculty Advisor', affiliation: 'Department of AIML, OCT Bhopal', role: 'Principal Investigator' },
-      { name: 'Aman Sharma', enrollment_number: '0126AL221001', role: 'Student Researcher' },
-    ],
-    category: 'COMPUTER_VISION',
-    publication_url: 'https://arxiv.org/abs/example-edge-yolo',
-    repository_url: 'https://github.com/aimlcluboct/edge-quantization-study',
-    dataset_url: 'https://huggingface.co/datasets/aimlcluboct/campus-vision',
-    linked_event_id: '00000000-0000-0000-0000-000000000101',
-    linked_event_title: 'Aptify 2.0: AI Symposium',
-    linked_project_id: '00000000-0000-0000-0000-000000000901',
-    linked_project_title: 'OCT Vision AI: Smart Campus Surveillance',
-    visibility: 'PUBLIC',
-    status: 'PUBLISHED',
-    published_at: '2026-03-12T10:00:00Z',
-    created_at: '2026-02-15T09:00:00Z',
-    updated_at: '2026-03-12T10:00:00Z',
-  },
-  {
-    id: '00000000-0000-0000-0000-000000000802',
-    title: 'Federated Learning for Cross-Departmental Student Academic Predictive Analytics',
-    slug: 'federated-learning-student-assessment',
-    abstract:
-      'Decentralized neural network training for predictive learning analytics without consolidating private student grade transcripts into a central database.',
-    methodology: 'Differential privacy mechanisms coupled with FedAvg federated aggregation over student local assessment metrics.',
-    authors: [
-      { name: 'Daksh Lead', enrollment_number: '0126AL231002', role: 'Author' },
-    ],
-    category: 'AI_ML',
-    publication_url: 'https://research.aimlcluboct.in/papers/fl-analytics',
-    repository_url: 'https://github.com/aimlcluboct/federated-academic-ml',
-    visibility: 'AUTHENTICATED',
-    status: 'DRAFT',
-    created_at: '2026-09-18T11:00:00Z',
-    updated_at: '2026-09-18T11:00:00Z',
-  },
-];
 
 export default function ResearchAdminPage() {
   const [items, setItems] = useState<ResearchItem[]>([]);
@@ -117,10 +73,11 @@ export default function ResearchAdminPage() {
         const body = await res.json();
         setItems(body.data || []);
       } else {
-        setItems(SAMPLE_RESEARCH);
+        setItems([]);
       }
-    } catch {
-      setItems(SAMPLE_RESEARCH);
+    } catch (err) {
+      console.error('Failed to fetch research items in admin:', err);
+      setItems([]);
     } finally {
       setLoading(false);
     }

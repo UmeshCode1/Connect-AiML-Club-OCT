@@ -10,62 +10,6 @@ interface PageProps {
   params: Promise<{ slug: string }>;
 }
 
-const SEED_DETAIL_LEARNING: Record<string, LearningResource> = {
-  'pytorch-neural-networks-notebook': {
-    id: '00000000-0000-0000-0000-000000000941',
-    title: 'Introduction to PyTorch & Neural Networks Workshop Notebook',
-    slug: 'pytorch-neural-networks-notebook',
-    resource_type: 'NOTEBOOK',
-    difficulty_level: 'BEGINNER',
-    description: `Interactive Google Colab notebook accompanying Aptify 2.0 PyTorch zero-to-hero hands-on lab.
-
-### Curriculum Overview
-1. Tensor operations and GPU acceleration primitives in PyTorch.
-2. Building feed-forward neural networks using torch.nn.Module.
-3. Defining loss functions and optimizers (SGD vs AdamW).
-4. Training loop execution with loss evaluation and accuracy metrics on MNIST / Fashion-MNIST.`,
-    url: 'https://colab.research.google.com/github/aimlcluboct/workshops/blob/main/pytorch_intro.ipynb',
-    linked_event_id: '00000000-0000-0000-0000-000000000101',
-    linked_event_title: 'Aptify 2.0: AI Symposium',
-    visibility: 'PUBLIC',
-    created_at: '2026-03-01T09:00:00Z',
-    updated_at: '2026-03-01T10:00:00Z',
-    published_at: '2026-03-01T10:00:00Z',
-  },
-  'yolov8-object-detection-slides': {
-    id: '00000000-0000-0000-0000-000000000942',
-    title: 'Computer Vision & Object Detection with YOLOv8',
-    slug: 'yolov8-object-detection-slides',
-    resource_type: 'SLIDES',
-    difficulty_level: 'INTERMEDIATE',
-    description: `Comprehensive slide deck explaining architecture, anchor boxes, and loss functions in modern single-shot detectors.
-
-Presented during the Computer Vision workshop track at Oriental College of Technology. Covers custom dataset annotation with Roboflow and transfer learning using Ultralytics.`,
-    url: 'https://docs.google.com/presentation/d/1yolov8_oct_presentation/edit',
-    linked_event_id: '00000000-0000-0000-0000-000000000101',
-    linked_event_title: 'Aptify 2.0: AI Symposium',
-    visibility: 'PUBLIC',
-    created_at: '2026-03-05T11:00:00Z',
-    updated_at: '2026-03-05T12:00:00Z',
-    published_at: '2026-03-05T12:00:00Z',
-  },
-  'advanced-llm-fine-tuning-guide': {
-    id: '00000000-0000-0000-0000-000000000943',
-    title: 'Advanced LLM Fine-Tuning & Quantization Guide',
-    slug: 'advanced-llm-fine-tuning-guide',
-    resource_type: 'DOCUMENTATION',
-    difficulty_level: 'ADVANCED',
-    description: `In-depth guide covering QLoRA, parameter-efficient fine-tuning (PEFT), and 4-bit quantization on campus compute nodes.
-
-Provides production deployment tips, memory profiling with PyTorch CUDA hooks, and model export to GGUF format for local edge inference.`,
-    url: 'https://aimlcluboct.in/docs/llm-tuning',
-    visibility: 'PUBLIC',
-    created_at: '2026-04-10T12:00:00Z',
-    updated_at: '2026-04-10T14:00:00Z',
-    published_at: '2026-04-10T14:00:00Z',
-  },
-};
-
 async function fetchLearningResource(slug: string): Promise<LearningResource | null> {
   try {
     const apiUrl = normalizeApiUrl(process.env.NEXT_PUBLIC_API_URL);
@@ -75,18 +19,15 @@ async function fetchLearningResource(slug: string): Promise<LearningResource | n
     if (res.ok) {
       const body = await res.json();
       const resource: LearningResource = body.data;
-      if (resource.visibility !== 'PUBLIC') {
+      if (!resource || resource.visibility !== 'PUBLIC') {
         return null;
       }
       return resource;
     }
-  } catch {
-    // Offline fallback for known seed slug
-    if (SEED_DETAIL_LEARNING[slug]) {
-      return SEED_DETAIL_LEARNING[slug];
-    }
+  } catch (err) {
+    console.error('Failed to fetch learning resource from API:', err);
   }
-  return SEED_DETAIL_LEARNING[slug] || null;
+  return null;
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {

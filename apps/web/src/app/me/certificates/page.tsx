@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { Card, StatusPill, Button, BrandHeader } from '@connect/ui';
+import { Card, StatusBadge, Button, BrandHeader, EmptyState, Input } from '@connect/ui';
 
 interface StudentCertificate {
   id: string;
@@ -17,22 +17,17 @@ interface StudentCertificate {
   verification_url: string;
 }
 
-const MOCK_STUDENT_CERTS: StudentCertificate[] = [
-  {
-    id: 'cert-student-001',
-    certificate_id: 'AIML26-APT-000184',
-    certificate_type: 'PARTICIPATION',
-    recipient_name: 'Priya Sharma',
-    event_title: 'Aptify 2.0: AI Symposium',
-    event_date: 'October 15, 2026',
-    issued_at: '2026-10-15T18:30:00Z',
-    status: 'ISSUED',
-    verification_url: 'https://aimlcluboct.in/verify/AIML26-APT-000184',
-  },
-];
-
 export default function StudentCertificatesPortfolioPage() {
-  const [certificates] = useState<StudentCertificate[]>(MOCK_STUDENT_CERTS);
+  const [certificates] = useState<StudentCertificate[]>([]);
+  const [lookupId, setLookupId] = useState('');
+
+  const handleLookup = (e: React.FormEvent) => {
+    e.preventDefault();
+    const clean = lookupId.trim();
+    if (clean) {
+      window.location.href = `/verify/${encodeURIComponent(clean)}`;
+    }
+  };
 
   return (
     <div style={{ maxWidth: '840px', margin: '36px auto', padding: '0 16px' }}>
@@ -53,15 +48,38 @@ export default function StudentCertificatesPortfolioPage() {
         </div>
       </div>
 
-      {certificates.length === 0 ? (
-        <Card elevated style={{ textAlign: 'center', padding: '40px 24px' }}>
-          <div style={{ color: '#64748B', fontSize: '1rem', marginBottom: '8px' }}>
-            No certificates issued yet.
+      {/* Manual Certificate Verification Lookup Tool */}
+      <Card style={{ marginBottom: '24px', padding: '20px 24px' }}>
+        <form onSubmit={handleLookup} style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+          <label style={{ fontSize: '0.875rem', fontWeight: 600, color: '#1E293B' }}>
+            Look Up &amp; Authenticate Any Certificate ID
+          </label>
+          <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+            <div style={{ flex: '1 1 260px' }}>
+              <Input
+                type="text"
+                placeholder="e.g. AIML26-APT-000101"
+                value={lookupId}
+                onChange={(e) => setLookupId(e.target.value)}
+              />
+            </div>
+            <Button variant="primary" type="submit" disabled={!lookupId.trim()}>
+              Verify Credential →
+            </Button>
           </div>
-          <p style={{ color: '#94A3B8', fontSize: '0.85rem' }}>
-            Once you participate in club events and satisfy attendance requirements, your verified credentials will appear here.
-          </p>
-        </Card>
+          <span style={{ fontSize: '0.75rem', color: '#64748B' }}>
+            Enter the unique ID printed on your physical or digital certificate to verify its cryptographic authenticity.
+          </span>
+        </form>
+      </Card>
+
+      {certificates.length === 0 ? (
+        <EmptyState
+          title="No certificates issued yet to this profile"
+          description="Once you participate in club events, complete workshop labs, and satisfy attendance requirements, your verified credentials will appear here automatically."
+          actionText="Explore Upcoming Events"
+          actionHref="/events"
+        />
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
           {certificates.map((cert) => (
@@ -72,7 +90,7 @@ export default function StudentCertificatesPortfolioPage() {
                     <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#014B7A', textTransform: 'uppercase' }}>
                       {cert.certificate_type} CERTIFICATE
                     </span>
-                    <StatusPill label={cert.status} variant="success" />
+                    <StatusBadge status={cert.status} />
                   </div>
                   <h2 style={{ fontSize: '1.25rem', fontWeight: 700, color: '#0F172A', marginTop: '4px', margin: 0 }}>
                     {cert.event_title}

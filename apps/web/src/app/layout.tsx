@@ -3,6 +3,7 @@ import './globals.css';
 import { BRAND } from '@connect/config';
 import { BrandHeader } from '@connect/ui';
 import { HeaderNav } from './components/HeaderNav';
+import { MobileBottomNav } from './components/MobileBottomNav';
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || `https://${BRAND.appDomain}`),
@@ -112,6 +113,8 @@ export default function RootLayout({
             </p>
           </div>
         </footer>
+
+        <MobileBottomNav />
       </body>
     </html>
   );

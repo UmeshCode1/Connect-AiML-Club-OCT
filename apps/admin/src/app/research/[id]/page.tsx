@@ -21,37 +21,12 @@ const STATUS_BADGES: Record<ResearchStatus, { bg: string; text: string; border: 
   ARCHIVED: { bg: '#18181B55', text: '#94A3B8', border: '#475569' },
 };
 
-const SAMPLE_RESEARCH: ResearchItem = {
-  id: '00000000-0000-0000-0000-000000000801',
-  title: 'Edge-Optimized Neural Networks for Campus Surveillance: A YOLOv8 Quantization Study',
-  slug: 'edge-optimized-neural-networks-campus',
-  abstract:
-    'Investigation into INT8 and FP16 quantization benchmarks for YOLOv8 object detection on edge devices deployed in institutional university campus topologies.',
-  methodology: 'Empirical bench-testing on Jetson Nano and Coral Edge TPU nodes with synthetic and real camera stream feeds.',
-  authors: [
-    { name: 'Dr. Faculty Advisor', affiliation: 'Department of AIML, OCT Bhopal', role: 'Principal Investigator' },
-    { name: 'Aman Sharma', enrollment_number: '0126AL221001', role: 'Student Researcher' },
-  ],
-  category: 'COMPUTER_VISION',
-  publication_url: 'https://arxiv.org/abs/example-edge-yolo',
-  repository_url: 'https://github.com/aimlcluboct/edge-quantization-study',
-  dataset_url: 'https://huggingface.co/datasets/aimlcluboct/campus-vision',
-  linked_event_id: '00000000-0000-0000-0000-000000000101',
-  linked_event_title: 'Aptify 2.0: AI Symposium',
-  linked_project_id: '00000000-0000-0000-0000-000000000901',
-  linked_project_title: 'OCT Vision AI: Smart Campus Surveillance',
-  visibility: 'PUBLIC',
-  status: 'PUBLISHED',
-  published_at: '2026-03-12T10:00:00Z',
-  created_at: '2026-02-15T09:00:00Z',
-  updated_at: '2026-03-12T10:00:00Z',
-};
-
+// Real API records only
 export default function ResearchDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = use(params);
   const itemId = resolvedParams.id;
 
-  const [item, setItem] = useState<ResearchItem>(SAMPLE_RESEARCH);
+  const [item, setItem] = useState<ResearchItem | null>(null);
   const [loading, setLoading] = useState(true);
   const [actionMessage, setActionMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const [isSaving, setIsSaving] = useState(false);
@@ -90,10 +65,11 @@ export default function ResearchDetailPage({ params }: { params: Promise<{ id: s
         setItem(data);
         populateForm(data);
       } else {
-        populateForm(SAMPLE_RESEARCH);
+        setActionMessage({ type: 'error', text: 'Research publication not found.' });
       }
-    } catch {
-      populateForm(SAMPLE_RESEARCH);
+    } catch (err) {
+      console.error('Failed to fetch research details in admin:', err);
+      setActionMessage({ type: 'error', text: 'Failed to connect to API server.' });
     } finally {
       setLoading(false);
     }
@@ -223,6 +199,26 @@ export default function ResearchDetailPage({ params }: { params: Promise<{ id: s
   const handleRemoveAuthor = (index: number) => {
     setAuthors((prev) => prev.filter((_, idx) => idx !== index));
   };
+
+  if (loading) {
+    return (
+      <div style={{ padding: '48px', textAlign: 'center', color: '#94A3B8' }}>
+        <p>Loading research publication from API...</p>
+      </div>
+    );
+  }
+
+  if (!item) {
+    return (
+      <div style={{ padding: '48px', textAlign: 'center', color: '#94A3B8' }}>
+        <h2 style={{ color: '#F8FAFC', marginBottom: '8px' }}>Research Publication Not Found</h2>
+        <p>The requested research paper could not be loaded from the backend API.</p>
+        <Link href="/research" style={{ display: 'inline-block', marginTop: '16px', color: '#38BDF8' }}>
+          ← Back to Research
+        </Link>
+      </div>
+    );
+  }
 
   const sColor = STATUS_BADGES[item.status] || STATUS_BADGES.DRAFT;
 

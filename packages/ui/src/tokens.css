@@ -2,50 +2,137 @@
  * AIML CLUB OCT — CONNECT
  * Core Design Tokens CSS
  *
- * Implements 06_DESIGN_SYSTEM.md specification
+ * Implements 06_DESIGN_SYSTEM.md and 14_MOTION_GUIDELINES.md specifications
  */
 
 :root {
   /* Brand Institutional Palette */
   --color-brand-primary: #014B7A;    /* Oriental Blue */
+  --color-brand-primary-hover: #01375a;
+  --color-brand-primary-subtle: #EFF6FB;
   --color-brand-secondary: #00763C;  /* Institutional Green */
+  --color-brand-secondary-hover: #005a2e;
+  --color-brand-secondary-subtle: #EBF7F0;
   --color-brand-accent: #A3E635;     /* AIML Club Logo Lime */
+  --color-brand-accent-hover: #8cd321;
+  --color-brand-accent-subtle: #F7FEE7;
   
   /* Neutral Surfaces */
   --color-near-black: #0B0F14;
   --color-dark-surface: #111820;
   --color-dark-elevated: #1D2630;
-  --color-bg-light: #F7F9FB;
+  --color-dark-border: #283545;
+  --color-dark-text-primary: #F8FAFC;
+  --color-dark-text-secondary: #94A3B8;
+  --color-dark-text-muted: #64748B;
+
+  --color-bg-light: #F8FAFC;
   --color-surface-white: #FFFFFF;
+  --color-surface-subtle: #F1F5F9;
   
   /* Borders */
-  --color-border: #E5EAF0;
-  --color-border-strong: #CBD3DC;
+  --color-border: #E2E8F0;
+  --color-border-strong: #CBD5E1;
+  --color-border-focus: #014B7A;
   
   /* Typography Colors */
-  --color-text-primary: #111827;
-  --color-text-secondary: #5B6573;
-  --color-text-muted: #8A95A3;
+  --color-text-primary: #0F172A;
+  --color-text-secondary: #475569;
+  --color-text-muted: #64748B;
+  --color-text-light: #F8FAFC;
   
-  /* Semantic */
+  /* Semantic Colors */
   --color-success: #00763C;
+  --color-success-bg: #ECFDF5;
+  --color-success-border: #A7F3D0;
+  --color-success-text: #065F46;
+
   --color-warning: #D97706;
+  --color-warning-bg: #FFFBEB;
+  --color-warning-border: #FDE68A;
+  --color-warning-text: #92400E;
+
   --color-error: #DC2626;
+  --color-error-bg: #FEF2F2;
+  --color-error-border: #FECACA;
+  --color-error-text: #991B1B;
+
   --color-info: #014B7A;
+  --color-info-bg: #EFF6FF;
+  --color-info-border: #BFDBFE;
+  --color-info-text: #1E40AF;
+
+  /* Typography Scales */
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+
+  --text-display: clamp(2rem, 4vw + 1rem, 3rem);
+  --text-h1: clamp(1.75rem, 2.5vw + 0.75rem, 2.25rem);
+  --text-h2: clamp(1.375rem, 1.5vw + 0.5rem, 1.75rem);
+  --text-h3: 1.25rem;
+  --text-h4: 1.125rem;
+  --text-body: 0.9375rem;
+  --text-body-sm: 0.875rem;
+  --text-caption: 0.8125rem;
+  --text-xs: 0.75rem;
+
+  --leading-tight: 1.2;
+  --leading-snug: 1.35;
+  --leading-normal: 1.5;
+  --leading-relaxed: 1.625;
+
+  /* Spacing Scale */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+  --space-20: 80px;
 
   /* Radii */
+  --radius-xs: 2px;
   --radius-sm: 4px;
   --radius-md: 8px;
   --radius-lg: 12px;
   --radius-xl: 16px;
+  --radius-2xl: 24px;
   --radius-full: 9999px;
 
-  /* Typography */
-  --font-sans: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
-  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  /* Max Widths */
+  --max-width-page: 1280px;
+  --max-width-editorial: 960px;
+  --max-width-prose: 720px;
 
   /* Shadows (Restrained) */
+  --shadow-none: none;
   --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.07), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.06), 0 2px 4px -2px rgba(0, 0, 0, 0.04);
   --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.04);
+  --shadow-modal: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+
+  /* Motion & Easing per 14_MOTION_GUIDELINES.md */
+  --ease-standard: cubic-bezier(0.2, 0.0, 0, 1.0);
+  --ease-decelerate: cubic-bezier(0.0, 0.0, 0.2, 1);
+  --ease-accelerate: cubic-bezier(0.3, 0.0, 1, 1);
+  --duration-micro: 140ms;
+  --duration-component: 220ms;
+  --duration-page: 300ms;
+
+  --transition-fast: all 140ms var(--ease-standard);
+  --transition-normal: all 220ms var(--ease-standard);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --duration-micro: 0ms;
+    --duration-component: 0ms;
+    --duration-page: 0ms;
+    --transition-fast: none;
+    --transition-normal: none;
+  }
 }

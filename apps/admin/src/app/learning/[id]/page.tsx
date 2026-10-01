@@ -22,28 +22,13 @@ const DIFFICULTY_BADGES: Record<LearningDifficultyLevel, { bg: string; text: str
   ADVANCED: { bg: '#581C8722', text: '#D8B4FE', border: '#A855F7' },
 };
 
-const SAMPLE_LEARNING: LearningResource = {
-  id: '00000000-0000-0000-0000-000000000851',
-  title: 'Hands-on PyTorch: Building Deep Neural Networks from Scratch',
-  slug: 'pytorch-neural-networks-notebook',
-  resource_type: 'NOTEBOOK',
-  difficulty_level: 'BEGINNER',
-  description: 'Interactive Google Colab notebook accompanying the Aptify deep learning session with GPU acceleration.',
-  url: 'https://colab.research.google.com/github/aimlcluboct/pytorch-basics.ipynb',
-  linked_event_id: '00000000-0000-0000-0000-000000000101',
-  linked_event_title: 'Aptify 2.0: AI Symposium',
-  visibility: 'PUBLIC',
-  published_at: '2026-03-11T12:00:00Z',
-  created_at: '2026-02-20T10:00:00Z',
-  updated_at: '2026-03-11T12:00:00Z',
-};
-
+// Real API records only
 export default function LearningDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = use(params);
   const resourceId = resolvedParams.id;
   const router = useRouter();
 
-  const [resource, setResource] = useState<LearningResource>(SAMPLE_LEARNING);
+  const [resource, setResource] = useState<LearningResource | null>(null);
   const [loading, setLoading] = useState(true);
   const [actionMessage, setActionMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const [isSaving, setIsSaving] = useState(false);
@@ -73,10 +58,11 @@ export default function LearningDetailPage({ params }: { params: Promise<{ id: s
         setResource(data);
         populateForm(data);
       } else {
-        populateForm(SAMPLE_LEARNING);
+        setActionMessage({ type: 'error', text: 'Learning resource not found.' });
       }
-    } catch {
-      populateForm(SAMPLE_LEARNING);
+    } catch (err) {
+      console.error('Failed to fetch learning resource in admin:', err);
+      setActionMessage({ type: 'error', text: 'Failed to connect to API server.' });
     } finally {
       setLoading(false);
     }
@@ -173,6 +159,28 @@ export default function LearningDetailPage({ params }: { params: Promise<{ id: s
       setIsDeleteModalOpen(false);
     }
   };
+
+  if (loading) {
+    return (
+      <div style={{ padding: '40px 0', textAlign: 'center', color: '#94A3B8' }}>
+        Loading learning resource records...
+      </div>
+    );
+  }
+
+  if (!resource) {
+    return (
+      <div style={{ padding: '40px 0', textAlign: 'center' }}>
+        <p style={{ color: '#F87171', fontSize: '1.1rem', fontWeight: 600 }}>Resource not found</p>
+        <p style={{ color: '#94A3B8', fontSize: '0.9rem', marginTop: '6px' }}>
+          The requested learning resource does not exist or has been removed.
+        </p>
+        <Link href="/learning" style={{ color: '#38BDF8', fontSize: '0.875rem', marginTop: '16px', display: 'inline-block' }}>
+          ← Back to Learning Catalog
+        </Link>
+      </div>
+    );
+  }
 
   const diffBadge = DIFFICULTY_BADGES[resource.difficulty_level] || DIFFICULTY_BADGES.BEGINNER;
 

@@ -10,43 +10,6 @@ interface PageProps {
   params: Promise<{ slug: string }>;
 }
 
-const SEED_DETAIL_RESEARCH: Record<string, ResearchItem> = {
-  'edge-transformer-architectures-oct': {
-    id: '00000000-0000-0000-0000-000000000921',
-    title: 'Comparative Analysis of Lightweight Transformer Architectures for Edge Devices',
-    slug: 'edge-transformer-architectures-oct',
-    abstract:
-      'We evaluate quantization, pruning, and low-rank approximation methods for MobileBERT and TinyLlama deployed on Jetson Orin edge nodes in campus edge AI setups.',
-    authors: [
-      {
-        name: 'Aman Sharma',
-        affiliation: 'Oriental College of Technology, Bhopal',
-        role: 'Lead Researcher',
-      },
-      {
-        name: 'Club Research Group',
-        affiliation: 'AIML Club OCT',
-        role: 'Collaborators',
-      },
-    ],
-    category: 'AI_ML',
-    methodology:
-      'Benchmarking inference latency, memory consumption, and perplexity across quantized models running TensorRT and ONNX Runtime. Evaluation runs were executed on local Jetson Orin Nano modules under varied ambient thermal conditions.',
-    publication_url: 'https://arxiv.org/abs/2401.00001',
-    repository_url: 'https://github.com/aimlcluboct/edge-transformers',
-    dataset_url: 'https://huggingface.co/datasets/aimlcluboct/campus-edge-benchmarks',
-    linked_event_id: '00000000-0000-0000-0000-000000000101',
-    linked_event_title: 'Aptify 2.0: AI Symposium',
-    linked_project_id: '00000000-0000-0000-0000-000000000901',
-    linked_project_title: 'OCT Vision AI: Smart Campus Surveillance',
-    visibility: 'PUBLIC',
-    status: 'PUBLISHED',
-    created_at: '2026-02-15T09:00:00Z',
-    updated_at: '2026-03-15T10:00:00Z',
-    published_at: '2026-03-15T10:00:00Z',
-  },
-};
-
 async function fetchResearchItem(slug: string): Promise<ResearchItem | null> {
   try {
     const apiUrl = normalizeApiUrl(process.env.NEXT_PUBLIC_API_URL);
@@ -56,19 +19,17 @@ async function fetchResearchItem(slug: string): Promise<ResearchItem | null> {
     if (res.ok) {
       const body = await res.json();
       const item: ResearchItem = body.data;
+      if (!item) return null;
       // Guardrail: Draft or private research MUST NOT be accessible
       if (item.visibility !== 'PUBLIC' || item.status !== 'PUBLISHED') {
         return null;
       }
       return item;
     }
-  } catch {
-    // Offline fallback for known seed pre-print
-    if (SEED_DETAIL_RESEARCH[slug]) {
-      return SEED_DETAIL_RESEARCH[slug];
-    }
+  } catch (err) {
+    console.error('Failed to fetch research item from API:', err);
   }
-  return SEED_DETAIL_RESEARCH[slug] || null;
+  return null;
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {

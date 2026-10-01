@@ -18,61 +18,12 @@ const STATUS_BADGES: Record<ProjectStatus, { bg: string; text: string; border: s
   COMPLETED: { bg: '#064E3B22', text: '#6EE7B7', border: '#10B981' },
   ARCHIVED: { bg: '#18181B55', text: '#94A3B8', border: '#475569' },
 };
-
-const SAMPLE_PROJECT: Project = {
-  id: '00000000-0000-0000-0000-000000000901',
-  title: 'OCT Vision AI: Smart Campus Surveillance',
-  slug: 'oct-vision-ai-campus',
-  summary: 'Edge-computed real-time student safety and campus monitoring using YOLOv8 and Jetson nano nodes.',
-  description:
-    'Comprehensive vision AI platform deployed at Oriental College of Technology, detecting safety anomalies and parking congestion using local neural edge inferencing.',
-  status: 'COMPLETED',
-  technology_stack: ['Python', 'PyTorch', 'YOLOv8', 'OpenCV', 'FastAPI'],
-  repository_url: 'https://github.com/aimlcluboct/oct-vision-ai',
-  demo_url: 'https://vision.aimlcluboct.in',
-  documentation_url: 'https://docs.aimlcluboct.in/projects/vision-ai',
-  linked_event_id: '00000000-0000-0000-0000-000000000101',
-  linked_event_title: 'Aptify 2.0: AI Symposium',
-  visibility: 'PUBLIC',
-  is_featured: true,
-  published_at: '2026-03-10T10:00:00Z',
-  created_at: '2026-02-01T09:00:00Z',
-  updated_at: '2026-03-10T10:00:00Z',
-  members: [
-    {
-      id: '00000000-0000-0000-0000-000000000951',
-      project_id: '00000000-0000-0000-0000-000000000901',
-      student_id: '00000000-0000-0000-0000-000000000301',
-      role: 'LEAD',
-      display_order: 0,
-      created_at: '2026-02-01T09:00:00Z',
-      student: {
-        id: '00000000-0000-0000-0000-000000000301',
-        full_name: 'Aman Sharma',
-        enrollment_number: '0126AL221001',
-      },
-    },
-    {
-      id: '00000000-0000-0000-0000-000000000952',
-      project_id: '00000000-0000-0000-0000-000000000901',
-      student_id: '00000000-0000-0000-0000-000000000302',
-      role: 'CONTRIBUTOR',
-      display_order: 1,
-      created_at: '2026-02-05T10:00:00Z',
-      student: {
-        id: '00000000-0000-0000-0000-000000000302',
-        full_name: 'Daksh Lead',
-        enrollment_number: '0126AL231002',
-      },
-    },
-  ],
-};
-
+// Real API records only
 export default function ProjectDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = use(params);
   const projectId = resolvedParams.id;
 
-  const [project, setProject] = useState<Project>(SAMPLE_PROJECT);
+  const [project, setProject] = useState<Project | null>(null);
   const [loading, setLoading] = useState(true);
   const [actionMessage, setActionMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const [isSaving, setIsSaving] = useState(false);
@@ -115,10 +66,11 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ id: st
         setProject(data);
         populateForm(data);
       } else {
-        populateForm(SAMPLE_PROJECT);
+        setActionMessage({ type: 'error', text: 'Project not found or failed to load from API.' });
       }
-    } catch {
-      populateForm(SAMPLE_PROJECT);
+    } catch (err) {
+      console.error('Failed to fetch project details in admin:', err);
+      setActionMessage({ type: 'error', text: 'Could not connect to backend API server.' });
     } finally {
       setLoading(false);
     }
@@ -209,7 +161,7 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ id: st
   };
 
   const handleExecuteTransition = async () => {
-    if (!targetStatus) return;
+    if (!targetStatus || !project) return;
 
     try {
       const apiUrl = normalizeApiUrl(process.env.NEXT_PUBLIC_API_URL);
@@ -323,6 +275,26 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ id: st
       alert(`Error: ${err.message}`);
     }
   };
+
+  if (loading) {
+    return (
+      <div style={{ padding: '48px', textAlign: 'center', color: '#94A3B8' }}>
+        <p>Loading project dossier from API...</p>
+      </div>
+    );
+  }
+
+  if (!project) {
+    return (
+      <div style={{ padding: '48px', textAlign: 'center', color: '#94A3B8' }}>
+        <h2 style={{ color: '#F8FAFC', marginBottom: '8px' }}>Project Not Found</h2>
+        <p>The requested project record could not be loaded from the backend API.</p>
+        <Link href="/projects" style={{ display: 'inline-block', marginTop: '16px', color: '#38BDF8' }}>
+          ← Back to Projects
+        </Link>
+      </div>
+    );
+  }
 
   const currentBadge = STATUS_BADGES[project.status] || STATUS_BADGES.IDEA;
   const validTransitions = ALLOWED_PROJECT_TRANSITIONS[project.status] || [];

@@ -9,7 +9,7 @@
 html, body {
   background-color: var(--color-bg-light, #F7F9FB);
   color: var(--color-text-primary, #111827);
-  font-family: var(--font-sans, system-ui, sans-serif);
+  font-family: var(--font-sans, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif);
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
 }
@@ -17,12 +17,41 @@ html, body {
 a {
   color: var(--color-brand-primary, #014B7A);
   text-decoration: none;
+  transition: color 150ms ease;
 }
 
 a:hover {
   text-decoration: underline;
 }
 
+/* Touch targets & Accessibility */
+button, a, input, select, textarea {
+  font-family: inherit;
+}
+
+button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible {
+  outline: 2px solid #014B7A;
+  outline-offset: 2px;
+}
+
+/* Responsive visibility utilities */
+@media (max-width: 768px) {
+  .desktop-only {
+    display: none !important;
+  }
+
+  body {
+    padding-bottom: 72px; /* space for mobile bottom navigation */
+  }
+}
+
+@media (min-width: 769px) {
+  .mobile-only {
+    display: none !important;
+  }
+}
+
+/* Smooth motion overrides */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;

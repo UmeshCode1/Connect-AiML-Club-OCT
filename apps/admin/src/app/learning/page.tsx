@@ -20,39 +20,8 @@ const DIFFICULTY_BADGES: Record<LearningDifficultyLevel, { bg: string; text: str
   INTERMEDIATE: { bg: '#1E3A8A22', text: '#93C5FD', border: '#3B82F6' },
   ADVANCED: { bg: '#581C8722', text: '#D8B4FE', border: '#A855F7' },
 };
+// Real API records only
 
-const SAMPLE_LEARNING: LearningResource[] = [
-  {
-    id: '00000000-0000-0000-0000-000000000851',
-    title: 'Hands-on PyTorch: Building Deep Neural Networks from Scratch',
-    slug: 'pytorch-neural-networks-notebook',
-    resource_type: 'NOTEBOOK',
-    difficulty_level: 'BEGINNER',
-    description: 'Interactive Google Colab notebook accompanying the Aptify deep learning session with GPU acceleration.',
-    url: 'https://colab.research.google.com/github/aimlcluboct/pytorch-basics.ipynb',
-    linked_event_id: '00000000-0000-0000-0000-000000000101',
-    linked_event_title: 'Aptify 2.0: AI Symposium',
-    visibility: 'PUBLIC',
-    published_at: '2026-03-11T12:00:00Z',
-    created_at: '2026-02-20T10:00:00Z',
-    updated_at: '2026-03-11T12:00:00Z',
-  },
-  {
-    id: '00000000-0000-0000-0000-000000000852',
-    title: 'Model Quantization & TensorRT Inference Optimization Tutorial',
-    slug: 'model-quantization-tensorrt-tutorial',
-    resource_type: 'TUTORIAL',
-    difficulty_level: 'ADVANCED',
-    description: 'Post-training INT8 quantization and TensorRT engine compilation for edge embedded devices.',
-    url: 'https://docs.aimlcluboct.in/tutorials/tensorrt-quantization',
-    linked_event_id: '00000000-0000-0000-0000-000000000101',
-    linked_event_title: 'Aptify 2.0: AI Symposium',
-    visibility: 'PUBLIC',
-    published_at: '2026-03-15T14:00:00Z',
-    created_at: '2026-03-01T11:00:00Z',
-    updated_at: '2026-03-15T14:00:00Z',
-  },
-];
 
 export default function LearningAdminPage() {
   const [resources, setResources] = useState<LearningResource[]>([]);
@@ -99,10 +68,11 @@ export default function LearningAdminPage() {
         const body = await res.json();
         setResources(body.data || []);
       } else {
-        setResources(SAMPLE_LEARNING);
+        setResources([]);
       }
-    } catch {
-      setResources(SAMPLE_LEARNING);
+    } catch (err) {
+      console.error('Failed to fetch learning resources in admin:', err);
+      setResources([]);
     } finally {
       setLoading(false);
     }
