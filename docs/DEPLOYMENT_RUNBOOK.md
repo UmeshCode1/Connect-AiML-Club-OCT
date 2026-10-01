@@ -1,18 +1,20 @@
 # AIML CLUB OCT — CONNECT
 ## Production Deployment Runbook (`DEPLOYMENT_RUNBOOK.md`)
 
-Version: 1.0  
+Version: 2.0  
 Release: `v1.6.0`  
 Last Updated: 2026-10-01  
 Target Repositories & Environments:
 - Monorepo: `UmeshCode1/Connect-AiML-Club-OCT`
-- Supabase Project Ref: `sslkenwxjqwwzcgafghm` (Region `ap-southeast-1`)
+- Database: Supabase PostgreSQL `sslkenwxjqwwzcgafghm` (Region `ap-southeast-1`, Migration `000009` applied)
+- Production API Host: **Microsoft Azure Container Apps** (Azure for Students subscription)
+- Production Frontend Hosts: **Vercel** (`apps/web` and `apps/admin`)
 
 ---
 
 ### 1. Architectural Overview & Domain Mapping
 
-Connect is an ecosystem of applications operating on dedicated subdomains. The root institutional domain is strictly preserved:
+Connect is an ecosystem of applications operating on dedicated subdomains. The root institutional domain is strictly preserved and must never be altered or redirected:
 
 ```text
                   aimlcluboct.in
@@ -23,7 +25,7 @@ Connect is an ecosystem of applications operating on dedicated subdomains. The r
     ▼                   ▼                   ▼
 app.aimlcluboct.in   admin.aimlcluboct.in  api.aimlcluboct.in
  (apps/web)          (apps/admin)          (apps/api)
-  Vercel               Vercel               Render / ASGI
+  Vercel (Proj A)     Vercel (Proj B)       Azure Container Apps
 ```
 
 | Component | Target Domain | Host / Provider | Source Directory | Framework / Runtime |
@@ -31,28 +33,139 @@ app.aimlcluboct.in   admin.aimlcluboct.in  api.aimlcluboct.in
 | **Existing Site** | `aimlcluboct.in` | Existing Vercel | *External / Intact* | *Do Not Modify* |
 | **Student Web PWA** | `app.aimlcluboct.in` | Vercel Project A | `apps/web` | Next.js 15 (App Router) |
 | **Admin Portal** | `admin.aimlcluboct.in` | Vercel Project B | `apps/admin` | Next.js 15 (App Router) |
-| **Backend API** | `api.aimlcluboct.in` | Render (or ASGI Container) | `apps/api` | FastAPI (Python 3.12+) |
+| **Backend API** | `api.aimlcluboct.in` | Azure Container Apps | `apps/api` | FastAPI (Python 3.12+ ASGI) |
 | **Database** | Supabase Cloud | Supabase | `supabase/` | PostgreSQL with `pg_trgm`, RLS |
+
+*(Note: Render deployment via `render.yaml` is deprecated in favor of Azure Container Apps under the Azure for Students subscription).*
 
 ---
 
-### 2. Vercel Project A: Student/Member Web App (`apps/web`)
+### 2. Primary Backend API Deployment: Microsoft Azure Container Apps
 
-1. **Create New Project in Vercel Dashboard**:
-   - Link repository: `UmeshCode1/Connect-AiML-Club-OCT`
-   - **Project Name**: `connect-web` (or `connect-aiml-app`)
-   - **Framework Preset**: `Next.js`
-   - **Root Directory**: Click *Edit* and select `apps/web`.
-   - Ensure the option *"Include files outside of the Root Directory in the Build Step"* is checked (needed to access `@connect/*` workspace packages).
-2. **Build & Development Settings**:
-   - **Build Command**: Default (`next build` / `npm run build`)
-   - **Output Directory**: Default (`.next`)
-   - **Install Command**: Default (`npm install`)
-3. **Domain Configuration**:
-   - Navigate to **Settings $\rightarrow$ Domains**.
-   - Add domain: `app.aimlcluboct.in`.
-   - Verify CNAME record points to `cname.vercel-dns.com`.
-4. **Environment Variables**:
+The FastAPI backend is packaged using the production `Dockerfile` and deployed on Azure Container Apps with scale-to-zero to minimize consumption of student credits.
+
+#### A. Azure Resource Planning & Sizing (Cost Safe)
+- **Subscription**: Azure for Students ($100 credit)
+- **Resource Group**: `rg-aimlclub-connect-prod`
+- **Location**: `centralindia` (or `southeastasia` / nearest region)
+- **Container Registry**: `acrconnectaimlclub` (SKU: `Basic`, ~$0.16/day)
+- **Container Apps Environment**: `cae-aimlclub-connect-prod` (Consumption Workload Profile — includes 180,000 vCPU-seconds and 360,000 GiB-seconds free per month)
+- **Container App Sizing**:
+  - CPU: `0.25 vCPU`
+  - Memory: `0.5 GiB RAM`
+  - Min Replicas: `0` (Scales to zero when idle = 0 compute charge!)
+  - Max Replicas: `3` (Protects against runaway cost during traffic spikes)
+
+#### B. Step-by-Step Azure Provisioning & Deployment Commands
+
+```bash
+# 1. Log in to Azure
+az login
+
+# 2. Register required resource providers
+az provider register --namespace Microsoft.App
+az provider register --namespace Microsoft.OperationalInsights
+az provider register --namespace Microsoft.ContainerRegistry
+
+# 3. Create Resource Group
+az group create --name rg-aimlclub-connect-prod --location centralindia
+
+# 4. Create Azure Container Registry (Basic SKU)
+az acr create \
+  --resource-group rg-aimlclub-connect-prod \
+  --name acrconnectaimlclub \
+  --sku Basic \
+  --admin-enabled true
+
+# 5. Build and Push the Container Image directly in Azure (no local Docker required!)
+az acr build \
+  --registry acrconnectaimlclub \
+  --image connect-aimlclub-api:v1.6.0 \
+  . \
+  -f Dockerfile
+
+# 6. Create Azure Container Apps Environment (Consumption Plan)
+az containerapp env create \
+  --name cae-aimlclub-connect-prod \
+  --resource-group rg-aimlclub-connect-prod \
+  --location centralindia
+
+# 7. Create the Azure Container App with Production Configuration
+az containerapp create \
+  --name aca-connect-api \
+  --resource-group rg-aimlclub-connect-prod \
+  --environment cae-aimlclub-connect-prod \
+  --image acrconnectaimlclub.azurecr.io/connect-aimlclub-api:v1.6.0 \
+  --target-port 8000 \
+  --ingress external \
+  --cpu 0.25 \
+  --memory 0.5Gi \
+  --min-replicas 0 \
+  --max-replicas 3 \
+  --registry-server acrconnectaimlclub.azurecr.io \
+  --secrets \
+    database-url="<YOUR_SUPABASE_DATABASE_URL>" \
+    supabase-anon-key="<YOUR_SUPABASE_ANON_KEY>" \
+    supabase-jwt-secret="<YOUR_SUPABASE_JWT_SECRET>" \
+    secret-key="<YOUR_RANDOM_SECRET_KEY>" \
+  --env-vars \
+    ENVIRONMENT=production \
+    PORT=8000 \
+    PYTHONPATH=/app \
+    SUPABASE_URL=https://sslkenwxjqwwzcgafghm.supabase.co \
+    CORS_ORIGINS="https://app.aimlcluboct.in,https://admin.aimlcluboct.in,https://aimlcluboct.in" \
+    DATABASE_URL=secretref:database-url \
+    SUPABASE_ANON_KEY=secretref:supabase-anon-key \
+    SUPABASE_JWT_SECRET=secretref:supabase-jwt-secret \
+    SECRET_KEY=secretref:secret-key
+```
+
+#### C. Custom Domain & DNS for `api.aimlcluboct.in`
+1. **Retrieve Ingress FQDN**:
+   ```bash
+   az containerapp show --name aca-connect-api --resource-group rg-aimlclub-connect-prod --query properties.configuration.ingress.fqdn -o tsv
+   # Output e.g.: aca-connect-api.wonderfulplant-xxxx.centralindia.azurecontainerapps.io
+   ```
+2. **Update DNS Records at Hostinger/DNS Registrar**:
+   - `api.aimlcluboct.in` currently points toward Vercel Anycast.
+   - Add verification TXT record:
+     - **Name**: `asuid.api`
+     - **Value**: Verification ID obtained from `az containerapp hostname get-verification-id`
+   - Update CNAME record:
+     - **Name**: `api`
+     - **Target**: `<aca-connect-api-fqdn>`
+3. **Bind Custom Domain & Free Managed Certificate**:
+   ```bash
+   az containerapp hostname bind \
+     --hostname api.aimlcluboct.in \
+     --name aca-connect-api \
+     --resource-group rg-aimlclub-connect-prod \
+     --environment cae-aimlclub-connect-prod \
+     --validation-method CNAME
+   ```
+
+#### D. Azure Student Cost Control & Budget Alerts
+1. In Azure Portal: Navigate to **Cost Management + Billing $\rightarrow$ Budgets**.
+2. Click **Add Budget**:
+   - **Name**: `aimlclub-connect-student-budget`
+   - **Reset Period**: Monthly
+   - **Amount**: `$10.00`
+   - **Alert Conditions**: Trigger alert at 50% ($5.00), 80% ($8.00), and 100% ($10.00).
+   - **Notification**: Add administrator email.
+3. Scale-to-zero is configured by default (`min-replicas: 0`), ensuring zero compute charges when there is no incoming traffic.
+
+---
+
+### 3. Vercel Project A: Student/Member Web App (`apps/web`)
+
+1. **Dashboard Configuration**:
+   - Add New Project $\rightarrow$ Link `Connect-AiML-Club-OCT`
+   - **Project Name**: `connect-web`
+   - **Framework**: `Next.js`
+   - **Root Directory**: `apps/web` (Enable *"Include files outside Root Directory"*)
+2. **Domain Configuration**:
+   - Settings $\rightarrow$ Domains $\rightarrow$ Add `app.aimlcluboct.in`.
+3. **Environment Variables**:
    - `NEXT_PUBLIC_APP_URL`: `https://app.aimlcluboct.in`
    - `NEXT_PUBLIC_API_URL`: `https://api.aimlcluboct.in`
    - `NEXT_PUBLIC_MAIN_SITE_URL`: `https://aimlcluboct.in`
@@ -61,23 +174,16 @@ app.aimlcluboct.in   admin.aimlcluboct.in  api.aimlcluboct.in
 
 ---
 
-### 3. Vercel Project B: Admin Management Portal (`apps/admin`)
+### 4. Vercel Project B: Admin Management Portal (`apps/admin`)
 
-1. **Create New Project in Vercel Dashboard**:
-   - Link repository: `UmeshCode1/Connect-AiML-Club-OCT`
+1. **Dashboard Configuration**:
+   - Add New Project $\rightarrow$ Link `Connect-AiML-Club-OCT`
    - **Project Name**: `connect-admin`
-   - **Framework Preset**: `Next.js`
-   - **Root Directory**: Click *Edit* and select `apps/admin`.
-   - Ensure *"Include files outside of the Root Directory in the Build Step"* is checked.
-2. **Build & Development Settings**:
-   - **Build Command**: Default (`next build` / `npm run build`)
-   - **Output Directory**: Default (`.next`)
-   - **Install Command**: Default (`npm install`)
-3. **Domain Configuration**:
-   - Navigate to **Settings $\rightarrow$ Domains**.
-   - Add domain: `admin.aimlcluboct.in`.
-   - Verify CNAME record points to `cname.vercel-dns.com`.
-4. **Environment Variables**:
+   - **Framework**: `Next.js`
+   - **Root Directory**: `apps/admin` (Enable *"Include files outside Root Directory"*)
+2. **Domain Configuration**:
+   - Settings $\rightarrow$ Domains $\rightarrow$ Add `admin.aimlcluboct.in`.
+3. **Environment Variables**:
    - `NEXT_PUBLIC_APP_URL`: `https://admin.aimlcluboct.in`
    - `NEXT_PUBLIC_API_URL`: `https://api.aimlcluboct.in`
    - `NEXT_PUBLIC_MAIN_SITE_URL`: `https://aimlcluboct.in`
@@ -86,83 +192,20 @@ app.aimlcluboct.in   admin.aimlcluboct.in  api.aimlcluboct.in
 
 ---
 
-### 4. FastAPI Backend Deployment: Render (`apps/api`)
+### 5. Root Domain Protection & Isolation Verification
 
-The persistent FastAPI service runs using Uvicorn via `render.yaml` or a Render Web Service.
-
-1. **Render Configuration Settings**:
-   - **Environment**: Python 3.12+
-   - **Root Directory**: `.` (Repository root)
-   - **Build Command**: `pip install -r apps/api/requirements.txt`
-   - **Start Command**: `uvicorn apps.api.src.main:app --host 0.0.0.0 --port $PORT`
-   - **Health Check Path**: `/health`
-2. **Custom Domain on Render**:
-   - In Render Dashboard: **Settings $\rightarrow$ Custom Domains**.
-   - Add: `api.aimlcluboct.in`.
-   - Configure DNS CNAME in Hostinger/Cloudflare for `api` subdomain to Render's onrender address.
-3. **Environment Variables (Render Dashboard $\rightarrow$ Environment)**:
-   - `ENVIRONMENT`: `production`
-   - `PORT`: `8000` (or injected by Render)
-   - `PYTHONPATH`: `.`
-   - `CORS_ORIGINS`: `https://app.aimlcluboct.in,https://admin.aimlcluboct.in,https://aimlcluboct.in`
-   - `DATABASE_URL`: `postgresql://postgres:[PASSWORD]@db.sslkenwxjqwwzcgafghm.supabase.co:5432/postgres`
-   - `SUPABASE_URL`: `https://sslkenwxjqwwzcgafghm.supabase.co`
-   - `SUPABASE_ANON_KEY`: `<SUPABASE_ANON_KEY>`
-   - `SUPABASE_JWT_SECRET`: `<SUPABASE_JWT_SECRET>`
-   - `SECRET_KEY`: `<STRONG_RANDOM_SECRET>`
-   - `GOOGLE_DRIVE_ROOT_FOLDER_ID`: `<FOLDER_ID>`
+- **URL**: `https://aimlcluboct.in`
+- **Rule**: Must always serve the existing website project. Never redirect to `app` or `admin`.
+- **Verification**: `curl -I https://aimlcluboct.in` $\rightarrow$ `HTTP 200 OK`.
 
 ---
 
-### 5. CORS & Origin Isolation
+### 6. Post-Deployment Verification Checklist
 
-Production CORS enforces strict origin whitelisting:
-- Permitted Origins:
-  - `https://app.aimlcluboct.in`
-  - `https://admin.aimlcluboct.in`
-  - `https://aimlcluboct.in`
-- Wildcards (`"*"`) are strictly prohibited in authenticated production APIs.
-
----
-
-### 6. Health & Liveness Checks
-
-The API provides two endpoints:
-- Liveness Probe: `GET https://api.aimlcluboct.in/health`
-  - Expected Response: `200 OK`
-  - Payload:
-    ```json
-    {
-      "status": "healthy",
-      "service": "AIML Club OCT — Connect API",
-      "environment": "production",
-      "tagline": "Innovate. Implement. Inspire."
-    }
-    ```
-- Readiness Probe: `GET https://api.aimlcluboct.in/ready`
-  - Expected Response: `200 OK`
-
----
-
-### 7. Rollback Procedures
-
-1. **Frontend / Admin Rollback**:
-   - In Vercel Project Dashboard: **Deployments**.
-   - Select previous successful deployment and click **Promote to Production** (instant zero-downtime rollback).
-2. **Backend API Rollback**:
-   - In Render Dashboard: Roll back to previous successful commit deploy.
-3. **Database Rollback**:
-   - Never run raw destructive SQL in production.
-   - Forward migration or point-in-time recovery via Supabase console.
-
----
-
-### 8. Verification & Post-Deployment Checklist
-
-Following deployment:
-1. `GET https://api.aimlcluboct.in/health` $\rightarrow$ `200 OK`.
-2. `GET https://app.aimlcluboct.in/projects` $\rightarrow$ `200 OK` (renders project gallery).
-3. `GET https://app.aimlcluboct.in/research` $\rightarrow$ `200 OK` (renders academic papers).
-4. `GET https://app.aimlcluboct.in/learning` $\rightarrow$ `200 OK` (renders resources).
-5. Open `https://app.aimlcluboct.in` and press `Ctrl+K` $\rightarrow$ Command palette opens and queries `/v1/search`.
-6. `GET https://aimlcluboct.in` $\rightarrow$ `200 OK` (confirms original public site remains untouched).
+Once services are provisioned:
+1. `GET https://api.aimlcluboct.in/health` $\rightarrow$ `200 OK`
+2. `GET https://app.aimlcluboct.in/projects` $\rightarrow$ `200 OK` (renders project gallery)
+3. `GET https://app.aimlcluboct.in/research` $\rightarrow$ `200 OK` (renders research catalog)
+4. `GET https://app.aimlcluboct.in/learning` $\rightarrow$ `200 OK` (renders learning resources)
+5. `GET https://app.aimlcluboct.in` $\rightarrow$ Press `Ctrl+K` $\rightarrow$ Global search queries `https://api.aimlcluboct.in/v1/search`
+6. `GET https://aimlcluboct.in` $\rightarrow$ `200 OK` (confirms original public site remains untouched)

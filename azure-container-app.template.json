@@ -1,0 +1,124 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "description": "Azure Container Apps deployment template for AIML Club OCT — Connect API (Azure for Students optimized)"
+  },
+  "parameters": {
+    "location": {
+      "type": "string",
+      "defaultValue": "centralindia",
+      "metadata": {
+        "description": "Azure region for deployment (e.g. centralindia, southeastasia, eastus)"
+      }
+    },
+    "environmentName": {
+      "type": "string",
+      "defaultValue": "cae-aimlclub-connect-prod"
+    },
+    "appName": {
+      "type": "string",
+      "defaultValue": "aca-connect-api"
+    },
+    "acrName": {
+      "type": "string",
+      "defaultValue": "acrconnectaimlclub"
+    },
+    "imageTag": {
+      "type": "string",
+      "defaultValue": "v1.6.0"
+    }
+  },
+  "variables": {
+    "imageName": "[concat(parameters('acrName'), '.azurecr.io/connect-aimlclub-api:', parameters('imageTag'))]"
+  },
+  "resources": [
+    {
+      "type": "Microsoft.App/containerApps",
+      "apiVersion": "2023-05-01",
+      "name": "[parameters('appName')]",
+      "location": "[parameters('location')]",
+      "properties": {
+        "managedEnvironmentId": "[resourceId('Microsoft.App/managedEnvironments', parameters('environmentName'))]",
+        "configuration": {
+          "ingress": {
+            "external": true,
+            "targetPort": 8000,
+            "transport": "auto",
+            "allowInsecure": false,
+            "corsPolicy": {
+              "allowedOrigins": [
+                "https://app.aimlcluboct.in",
+                "https://admin.aimlcluboct.in",
+                "https://aimlcluboct.in"
+              ],
+              "allowedMethods": ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+              "allowedHeaders": ["*"],
+              "allowCredentials": true
+            }
+          },
+          "registries": [
+            {
+              "server": "[concat(parameters('acrName'), '.azurecr.io')]",
+              "identity": "system"
+            }
+          ],
+          "secrets": [
+            { "name": "database-url", "value": "" },
+            { "name": "supabase-anon-key", "value": "" },
+            { "name": "supabase-jwt-secret", "value": "" },
+            { "name": "secret-key", "value": "" }
+          ]
+        },
+        "template": {
+          "containers": [
+            {
+              "image": "[variables('imageName')]",
+              "name": "connect-api",
+              "resources": {
+                "cpu": 0.25,
+                "memory": "0.5Gi"
+              },
+              "env": [
+                { "name": "ENVIRONMENT", "value": "production" },
+                { "name": "PORT", "value": "8000" },
+                { "name": "PYTHONPATH", "value": "/app" },
+                { "name": "SUPABASE_URL", "value": "https://sslkenwxjqwwzcgafghm.supabase.co" },
+                { "name": "CORS_ORIGINS", "value": "https://app.aimlcluboct.in,https://admin.aimlcluboct.in,https://aimlcluboct.in" },
+                { "name": "DATABASE_URL", "secretRef": "database-url" },
+                { "name": "SUPABASE_ANON_KEY", "secretRef": "supabase-anon-key" },
+                { "name": "SUPABASE_JWT_SECRET", "secretRef": "supabase-jwt-secret" },
+                { "name": "SECRET_KEY", "secretRef": "secret-key" }
+              ],
+              "probes": [
+                {
+                  "type": "Liveness",
+                  "httpGet": {
+                    "path": "/health",
+                    "port": 8000
+                  },
+                  "initialDelaySeconds": 5,
+                  "periodSeconds": 30
+                }
+              ]
+            }
+          ],
+          "scale": {
+            "minReplicas": 0,
+            "maxReplicas": 3,
+            "rules": [
+              {
+                "name": "http-scaling-rule",
+                "http": {
+                  "metadata": {
+                    "concurrentRequests": "50"
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    }
+  ]
+}
