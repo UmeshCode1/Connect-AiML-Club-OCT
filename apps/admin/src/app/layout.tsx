@@ -48,17 +48,26 @@ export default function RootLayout({
             </span>
           </div>
 
-          <nav style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-            <Link href="/" style={{ color: '#E2E8F0', fontSize: '0.9rem', fontWeight: 500 }}>
+          <nav style={{ display: 'flex', alignItems: 'center', gap: '16px', flexWrap: 'wrap' }}>
+            <Link href="/" style={{ color: '#E2E8F0', fontSize: '0.875rem', fontWeight: 500 }}>
               Overview
             </Link>
-            <Link href="/events" style={{ color: '#38BDF8', fontSize: '0.9rem', fontWeight: 600 }}>
+            <Link href="/events" style={{ color: '#E2E8F0', fontSize: '0.875rem', fontWeight: 500 }}>
               Events
             </Link>
-            <Link href="/chronicle" style={{ color: '#E2E8F0', fontSize: '0.9rem', fontWeight: 500 }}>
+            <Link href="/projects" style={{ color: '#38BDF8', fontSize: '0.875rem', fontWeight: 600 }}>
+              Projects
+            </Link>
+            <Link href="/research" style={{ color: '#38BDF8', fontSize: '0.875rem', fontWeight: 600 }}>
+              Research
+            </Link>
+            <Link href="/learning" style={{ color: '#38BDF8', fontSize: '0.875rem', fontWeight: 600 }}>
+              Learning
+            </Link>
+            <Link href="/chronicle" style={{ color: '#E2E8F0', fontSize: '0.875rem', fontWeight: 500 }}>
               Chronicle
             </Link>
-            <Link href="/journey" style={{ color: '#E2E8F0', fontSize: '0.9rem', fontWeight: 500 }}>
+            <Link href="/journey" style={{ color: '#E2E8F0', fontSize: '0.875rem', fontWeight: 500 }}>
               Journey
             </Link>
             <Link href="/events/new" style={{
@@ -66,7 +75,7 @@ export default function RootLayout({
               color: '#FFFFFF',
               padding: '6px 14px',
               borderRadius: '6px',
-              fontSize: '0.875rem',
+              fontSize: '0.8125rem',
               fontWeight: 600,
               textDecoration: 'none'
             }}>

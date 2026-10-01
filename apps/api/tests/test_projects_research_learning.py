@@ -665,4 +665,148 @@ def test_postgres_search_execution_row_mapping():
         assert items[0].metadata["status"] == "COMPLETED"
 
 
+# ==============================================================================
+# 7. PHASE 7.2 ADMIN WORKFLOW & RBAC BOUNDARY TESTS
+# ==============================================================================
+
+def test_admin_project_lifecycle_transitions():
+    """Admin can transition projects through valid lifecycle states."""
+    # Create fresh project in IDEA
+    payload = {
+        "title": "Autonomous Drone Fleet",
+        "summary": "Coordinated quadcopter search grid.",
+        "description": "Lifecycle transition test project.",
+        "technology_stack": ["ROS2", "Python"],
+    }
+    create_res = client.post("/v1/projects", json=payload, headers=STUDENT_HEADERS)
+    assert create_res.status_code == 201
+    proj_id = create_res.json()["data"]["id"]
+
+    # 1. Update project to IN_DEVELOPMENT
+    res = client.patch(
+        f"/v1/projects/{proj_id}",
+        json={"status": "IN_DEVELOPMENT"},
+        headers=ADMIN_HEADERS,
+    )
+    assert res.status_code == 200
+    assert res.json()["data"]["status"] == "IN_DEVELOPMENT"
+
+    # 2. Update project to COMPLETED
+    res2 = client.patch(
+        f"/v1/projects/{proj_id}",
+        json={"status": "COMPLETED"},
+        headers=ADMIN_HEADERS,
+    )
+    assert res2.status_code == 200
+    assert res2.json()["data"]["status"] == "COMPLETED"
+
+
+def test_admin_sole_lead_protection_cannot_remove():
+    """Verify that removing the sole project LEAD is rejected to preserve lead integrity."""
+    # Create single-lead project
+    payload = {
+        "title": "Lead Integrity Test",
+        "summary": "Sole lead test",
+        "description": "Verifying lead protection",
+    }
+    res = client.post("/v1/projects", json=payload, headers=STUDENT_HEADERS)
+    assert res.status_code == 201
+    proj = res.json()["data"]
+    proj_id = proj["id"]
+    lead_student_id = proj["members"][0]["student_id"]
+
+    # Attempt to remove the sole lead
+    del_res = client.delete(
+        f"/v1/projects/{proj_id}/members/{lead_student_id}",
+        headers=ADMIN_HEADERS,
+    )
+    assert del_res.status_code == 400
+    err = del_res.json()["error"]
+    assert "lead" in err["message"].lower() or "sole" in err["message"].lower()
+
+
+def test_admin_research_publishing_and_archive():
+    """Admin can publish and archive academic research items."""
+    # 1. Staff creates draft research
+    payload = {
+        "title": "Edge Federated Learning for IoT Swarms",
+        "slug": "edge-federated-learning-iot",
+        "abstract": "Decentralized model training across heterogeneous campus micro-controllers.",
+        "category": "REINFORCEMENT_LEARNING",
+        "authors": [{"name": "Aman Verma", "role": "Lead Researcher"}],
+        "publication_url": "https://arxiv.org/abs/2609.99999",
+        "visibility": "PUBLIC",
+        "status": "DRAFT",
+    }
+    create_res = client.post("/v1/research", json=payload, headers=CONTENT_MGR_HEADERS)
+    assert create_res.status_code == 201
+    item_id = create_res.json()["data"]["id"]
+
+    # 2. Staff updates status to PUBLISHED
+    pub_res = client.patch(f"/v1/research/{item_id}", json={"status": "PUBLISHED"}, headers=ADMIN_HEADERS)
+    assert pub_res.status_code == 200
+    assert pub_res.json()["data"]["status"] == "PUBLISHED"
+
+    # 3. Staff archives research
+    del_res = client.delete(f"/v1/research/{item_id}", headers=ADMIN_HEADERS)
+    assert del_res.status_code == 200
+    assert del_res.json()["data"]["status"] == "ARCHIVED"
+
+
+def test_admin_learning_resource_lifecycle():
+    """Admin can create, update, and remove learning resources."""
+    payload = {
+        "title": "Practical PyTorch Workshop Slides",
+        "slug": "practical-pytorch-workshop-slides",
+        "resource_type": "SLIDES",
+        "difficulty_level": "INTERMEDIATE",
+        "description": "Comprehensive presentation covering convolution and backpropagation.",
+        "url": "https://slides.aimlcluboct.in/pytorch-101",
+        "visibility": "PUBLIC",
+    }
+    create_res = client.post("/v1/learning", json=payload, headers=ADMIN_HEADERS)
+    assert create_res.status_code == 201
+    res_id = create_res.json()["data"]["id"]
+
+    # Update difficulty
+    patch_res = client.patch(f"/v1/learning/{res_id}", json={"difficulty_level": "ADVANCED"}, headers=ADMIN_HEADERS)
+    assert patch_res.status_code == 200
+    assert patch_res.json()["data"]["difficulty_level"] == "ADVANCED"
+
+    # Delete resource
+    del_res = client.delete(f"/v1/learning/{res_id}", headers=ADMIN_HEADERS)
+    assert del_res.status_code == 200
+
+
+def test_unauthorized_admin_action_403():
+    """Non-privileged accounts receive 403 when attempting administrative actions."""
+    # Viewer cannot publish project
+    res = client.post(
+        "/v1/projects/00000000-0000-0000-0000-000000000902/publish",
+        headers=VIEWER_HEADERS,
+    )
+    assert res.status_code == 403
+
+    # Viewer cannot archive project
+    res2 = client.delete(
+        "/v1/projects/00000000-0000-0000-0000-000000000902",
+        headers=VIEWER_HEADERS,
+    )
+    assert res2.status_code == 403
+
+    # Viewer cannot create learning resource
+    res3 = client.post(
+        "/v1/learning",
+        json={
+            "title": "Unauthorized Resource",
+            "slug": "unauthorized-resource",
+            "resource_type": "TUTORIAL",
+            "difficulty_level": "BEGINNER",
+            "url": "https://aimlcluboct.in/unauth",
+        },
+        headers=VIEWER_HEADERS,
+    )
+    assert res3.status_code == 403
+
+
 

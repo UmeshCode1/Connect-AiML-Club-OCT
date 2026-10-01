@@ -2,8 +2,8 @@
 # Phase 7 — Knowledge & Innovation Showcase Implementation Plan
 ## Projects, Research, Learning Resources & Authorization-Aware Global Search
 
-**Document Version**: 1.2.0  
-**Status**: PHASE 7.1 BACKEND DOMAIN SERVICES & ENDPOINTS COMPLETE (PHASE 7.2 PENDING USER AUTHORIZATION)  
+**Document Version**: 1.3.0  
+**Status**: PHASE 7.2 ADMIN MANAGEMENT WORKFLOWS COMPLETE (PHASE 7.3 PENDING USER AUTHORIZATION)  
 **Target Release**: `v1.6.0`  
 **Base Release**: `v1.5.0` (Audited Commit `ef5f9f1`)  
 **Production Supabase Reference**: `sslkenwxjqwwzcgafghm` (`Connect-AiML-Club-OCT`)  
@@ -387,11 +387,32 @@ Phase 7.4 — Comprehensive Security Audit, Testing & Production Deployment Gate
   - `@connect/web` Next.js Production Build: PASS (Exit code 0).
   - OpenAPI Schema Validation: PASS (72 routes registered).
 
-#### Milestone 7.2: Admin Experience — PENDING AUTHORIZATION
-- Build `/projects`, `/research`, `/learning` management interfaces in `@connect/admin`.
-- Enable editorial review, status updates, and member management.
+#### Milestone 7.2: Admin Experience — COMPLETED
+- **Navigation & Dashboard Integration**:
+  - Global navigation bar updated in `apps/admin/src/app/layout.tsx` to include `Projects`, `Research`, and `Learning`.
+  - Admin root dashboard in `apps/admin/src/app/page.tsx` updated with quick-launch cards and live status overviews.
+- **Projects Management Workflows (`apps/admin/src/app/projects`)**:
+  - Master List (`/projects`): Server-side query filtering (`status`, `visibility`, `is_featured`, debounced search), "+ Create Project" modal, quick publish/archive actions, and accessible data table with status badges.
+  - Project Detail & Contributor Management (`/projects/[id]`):
+    - Full project metadata editor (title, slug, summary, description, technology stack, external URLs).
+    - Lifecycle state machine transitions (`IDEA` → `IN_DEVELOPMENT` → `COMPLETED` → `ARCHIVED`) with confirmation dialogs.
+    - Publication workflow (Draft → Published / Archived).
+    - Contributor roster with add member dialog, role assignment (`LEAD`, `CONTRIBUTOR`, `MENTOR`, `ADVISOR`).
+    - **Lead Protection**: Explicitly prevents accidental deletion or demotion of the sole `LEAD` contributor.
+- **Research Management Workflows (`apps/admin/src/app/research`)**:
+  - Master List (`/research`): Filtering by academic category (`COMPUTER_VISION`, `NLP`, `REINFORCEMENT_LEARNING`, `GENERATIVE_AI`, `ROBOTICS`, `DATA_SCIENCE`), publication status, visibility, and search.
+  - Research Detail (`/research/[id]`): Academic editorial review of title, abstract, methodology, structured author attribution JSON, external paper/code/dataset URLs, and publication status.
+- **Learning Resources Catalog (`apps/admin/src/app/learning`)**:
+  - Master List (`/learning`): Multi-tier filtering by resource type (`NOTEBOOK`, `TUTORIAL`, `WORKSHOP_MATERIAL`, `RECORDING`, `DATASET`, `SLIDES`, `DOCUMENTATION`), difficulty level (`BEGINNER`, `INTERMEDIATE`, `ADVANCED`), visibility, and search.
+  - Learning Resource Detail (`/learning/[id]`): Resource editing, canonical event linking, safe HTTPS URL validation, and deletion confirmation modal.
+- **Validation & Regression**:
+  - Next.js 15 Async Route Params (`use(params)`) compliant across all dynamic routes.
+  - Full Backend Pytest Suite: 152/152 passing (100% pass rate, 0 regressions).
+  - Monorepo Typecheck: 0 errors across all 5 workspaces.
+  - Admin Production Build (`@connect/admin`): PASS (11/11 pages compiled).
+  - Web Production Build (`@connect/web`): PASS (9/9 pages compiled).
 
-#### Milestone 7.3: Public Showcase & Student Experience — PLANNED
+#### Milestone 7.3: Public Showcase & Student Experience — PENDING USER AUTHORIZATION
 - Build `/projects`, `/projects/[slug]` with responsive grid and contributor cards.
 - Build `/research`, `/research/[slug]` academic publication index.
 - Build `/learning`, `/learning/[slug]` open educational resource portal.
@@ -413,8 +434,9 @@ Phase 7.4 — Comprehensive Security Audit, Testing & Production Deployment Gate
 | Production Project Ref | **CONFIRMED** | `sslkenwxjqwwzcgafghm` (`Connect-AiML-Club-OCT`). |
 | Canonical RBAC | **CONFIRMED** | Canonical `check_user_has_role(...)` active and available. |
 | Phase 7.0 Foundation | **COMPLETE** | Migration 000009, types, Pydantic schemas, and 14 foundation tests verified. |
-| Phase 7.1 Backend Services | **COMPLETE** | 4 domain services, 4 endpoint routers, 29 tests verified (143/143 passing). |
-| Phase 7.2 Implementation Authorization | **PENDING** | **Strict Stop**: Await formal user instruction and approval to begin Phase 7.2 execution. |
+| Phase 7.1 Backend Services | **COMPLETE** | 4 domain services, 4 endpoint routers, 38 tests verified (152/152 passing). |
+| Phase 7.2 Admin Workflows | **COMPLETE** | Complete admin management for Projects, Research, Learning verified in `@connect/admin`. |
+| Phase 7.3 Public Showcase | **PENDING** | **Strict Stop**: Await formal user instruction and approval to begin Phase 7.3 execution. |
 
 
 ---

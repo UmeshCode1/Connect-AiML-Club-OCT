@@ -635,8 +635,8 @@ class ProjectService:
         if not target_member_id:
             raise NotFoundException("Member not found on this project.")
 
-        # Prevent removing the only LEAD unless staff or another lead exists
-        if target_role == "LEAD" and not is_staff:
+        # Prevent removing the only LEAD
+        if target_role == "LEAD":
             leads = [
                 m for m in self._members.values()
                 if m["project_id"] == project_id and m.get("role") == "LEAD"
