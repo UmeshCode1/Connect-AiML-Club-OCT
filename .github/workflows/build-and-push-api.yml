@@ -29,5 +29,6 @@ jobs:
           file: ./Dockerfile
           push: true
           tags: |
+            acrconnectaimlclub.azurecr.io/connect-aimlclub-api:v1.6.2
             acrconnectaimlclub.azurecr.io/connect-aimlclub-api:v1.6.0
             acrconnectaimlclub.azurecr.io/connect-aimlclub-api:latest
