@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next';
 import './globals.css';
 import { BRAND } from '@connect/config';
 import { BrandHeader } from '@connect/ui';
+import { HeaderNav } from './components/HeaderNav';
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || `https://${BRAND.appDomain}`),
@@ -75,24 +76,7 @@ export default function RootLayout({
             }}
           >
             <BrandHeader showTagline={true} />
-            <nav style={{ display: 'flex', gap: '20px', alignItems: 'center', fontSize: '0.9375rem', fontWeight: 500 }}>
-              <a href="/events">Events</a>
-              <a href="/chronicle">Chronicle</a>
-              <a href="/journey">Journey</a>
-              <a href="/verify/smoke-check">Verify</a>
-              <a
-                href="/auth"
-                style={{
-                  padding: '6px 14px',
-                  borderRadius: 'var(--radius-md, 8px)',
-                  backgroundColor: 'var(--color-brand-primary, #014B7A)',
-                  color: '#FFFFFF',
-                  textDecoration: 'none',
-                }}
-              >
-                Sign In
-              </a>
-            </nav>
+            <HeaderNav />
           </div>
         </header>
 

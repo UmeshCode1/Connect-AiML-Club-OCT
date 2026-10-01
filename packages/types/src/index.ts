@@ -854,6 +854,8 @@ export interface ProjectMember {
   role: ProjectMemberRole;
   display_order: number;
   created_at: string;
+  student_full_name?: string;
+  student_avatar_url?: string;
   student?: {
     id: string;
     full_name: string;

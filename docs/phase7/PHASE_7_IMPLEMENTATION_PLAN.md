@@ -2,8 +2,8 @@
 # Phase 7 — Knowledge & Innovation Showcase Implementation Plan
 ## Projects, Research, Learning Resources & Authorization-Aware Global Search
 
-**Document Version**: 1.3.0  
-**Status**: PHASE 7.2 ADMIN MANAGEMENT WORKFLOWS COMPLETE (PHASE 7.3 PENDING USER AUTHORIZATION)  
+**Document Version**: 1.4.0  
+**Status**: PHASE 7.3 PUBLIC SHOWCASE, STUDENT SUBMISSION & COMMAND PALETTE COMPLETE (PHASE 7.4 PENDING USER AUTHORIZATION)  
 **Target Release**: `v1.6.0`  
 **Base Release**: `v1.5.0` (Audited Commit `ef5f9f1`)  
 **Production Supabase Reference**: `sslkenwxjqwwzcgafghm` (`Connect-AiML-Club-OCT`)  
@@ -412,16 +412,39 @@ Phase 7.4 — Comprehensive Security Audit, Testing & Production Deployment Gate
   - Admin Production Build (`@connect/admin`): PASS (11/11 pages compiled).
   - Web Production Build (`@connect/web`): PASS (9/9 pages compiled).
 
-#### Milestone 7.3: Public Showcase & Student Experience — PENDING USER AUTHORIZATION
-- Build `/projects`, `/projects/[slug]` with responsive grid and contributor cards.
-- Build `/research`, `/research/[slug]` academic publication index.
-- Build `/learning`, `/learning/[slug]` open educational resource portal.
-- Implement root layout `<CommandPalette />` (`Ctrl+K`) with authorization-aware search.
+#### Milestone 7.3: Public Showcase, Student Submission & Command Palette — COMPLETED
+- **Global Ctrl+K Command Palette**:
+  - Authored `apps/web/src/app/components/CommandPalette.tsx` accessible modal dialog (`role="dialog"`, `aria-modal="true"`).
+  - Integrated global keyboard shortcuts (<kbd>Ctrl+K</kbd> / <kbd>Cmd+K</kbd>, <kbd>Escape</kbd>) and arrow-key list navigation (<kbd>↑</kbd>, <kbd>↓</kbd>, <kbd>Enter</kbd>).
+  - Mounted `<HeaderNav />` in `apps/web/src/app/layout.tsx` providing an accessible search trigger button and persistent platform navigation (`Events`, `Projects`, `Research`, `Learning`, `Chronicle`, `Journey`, `Verify`).
+  - Consumes `/v1/search?q={query}` backend endpoint powered by PostgreSQL trigram indexing with server-side authorization boundaries; groups results across 8 domains (Events, Projects, Research, Learning, Chronicle, Journey, Team, Certificates).
+- **Public Projects Showcase (`/projects` & `/projects/[slug]`)**:
+  - Directory (`/projects`): Server-side pre-rendering with client-side interactive search, lifecycle filter (`ALL`, `COMPLETED`, `IN_DEVELOPMENT`), and featured toggle.
+  - Project Detail (`/projects/[slug]`): Structured presentation of technical overview, problem statement, proposed architecture, technology stack, and verified contributor roster.
+  - Privacy Guarantees: Strictly exposes only public contributor full names and roles; never renders private emails, phone numbers, enrollment numbers, or internal account identifiers.
+  - 404 Behavior: Draft/internal projects (e.g. `club-neural-hardware-farm`) are isolated and return 404 for public visitors.
+- **Student Project Submission Flow (`/projects/submit`)**:
+  - Accessible multi-step proposal form for students to submit applied AI projects with problem/solution breakdown, technology tags, and external repository/demo/docs links.
+  - URL Security Policy: Strictly validates HTTP(S) protocol schemes using `^https?://` regex, preventing XSS and non-standard pseudo-protocols.
+  - Review & Moderation Enforcement: Automatically assigns the submitting student as `LEAD`; initial state enters the editorial queue; prevents direct student publishing or bypassing administrative review.
+  - IDOR Protection: Students cannot edit or hijack projects owned or led by others.
+- **Public Academic Research Archive (`/research` & `/research/[slug]`)**:
+  - Directory (`/research`): Proceedings-style listing filtered by academic category (`AI_ML`, `COMPUTER_VISION`, `NLP`, `REINFORCEMENT_LEARNING`, `GENERATIVE_AI`, `ROBOTICS`, `DATA_SCIENCE`) and keywords.
+  - Research Detail (`/research/[slug]`): Academic paper structure with abstract, methodology, authors and affiliations, paper/code/dataset launch buttons.
+  - Draft Isolation: Unpublished/draft pre-prints are strictly hidden from the public directory and return 404 on direct URL queries.
+- **Public Learning Resource Library (`/learning` & `/learning/[slug]`)**:
+  - Directory (`/learning`): Open educational resources catalog filterable by format (`NOTEBOOK`, `TUTORIAL`, `WORKSHOP_MATERIAL`, `RECORDING`, `DATASET`, `SLIDES`, `DOCUMENTATION`) and difficulty level (`BEGINNER`, `INTERMEDIATE`, `ADVANCED`).
+  - Resource Detail (`/learning/[slug]`): Curriculum breakdown, linked symposium event card, and direct Google Colab / Slides launch actions.
+- **Validation & Test Coverage**:
+  - Pytest Backend Suite: 164/164 tests passing (100% pass rate, 0 regressions).
+  - Monorepo Typecheck: 0 errors across all 5 workspaces (`@connect/admin`, `@connect/web`, `@connect/config`, `@connect/types`, `@connect/ui`).
+  - Admin Production Build (`@connect/admin`): PASS (11/11 pages compiled).
+  - Web Production Build (`@connect/web`): PASS (13/13 pages compiled).
 
-#### Milestone 7.4: Verification & Production Release Gate — PLANNED
-- Execute 100% green test suite.
+#### Milestone 7.4: Comprehensive Security Audit, Testing & Production Deployment Gate — PENDING USER AUTHORIZATION
+- Final pre-deployment verification across all security and privacy boundaries.
 - Deploy migration `000009` to Supabase production (`sslkenwxjqwwzcgafghm`).
-- Verify live constraints, RLS policies, and SEO metadata.
+- Verify live database constraints, RLS policies, and SEO metadata.
 - Compile Post-Release Audit Report and release `v1.6.0`.
 
 ---
@@ -436,7 +459,8 @@ Phase 7.4 — Comprehensive Security Audit, Testing & Production Deployment Gate
 | Phase 7.0 Foundation | **COMPLETE** | Migration 000009, types, Pydantic schemas, and 14 foundation tests verified. |
 | Phase 7.1 Backend Services | **COMPLETE** | 4 domain services, 4 endpoint routers, 38 tests verified (152/152 passing). |
 | Phase 7.2 Admin Workflows | **COMPLETE** | Complete admin management for Projects, Research, Learning verified in `@connect/admin`. |
-| Phase 7.3 Public Showcase | **PENDING** | **Strict Stop**: Await formal user instruction and approval to begin Phase 7.3 execution. |
+| Phase 7.3 Public Showcase | **COMPLETE** | Public showcase, student submission, and Ctrl+K palette verified in `@connect/web`. |
+| Phase 7.4 Production Gate | **PENDING** | **Strict Stop**: Await formal user instruction and approval to begin Phase 7.4 execution. |
 
 
 ---

@@ -809,4 +809,115 @@ def test_unauthorized_admin_action_403():
     assert res3.status_code == 403
 
 
+# ==============================================================================
+# 8. PHASE 7.3 PUBLIC SHOWCASE, STUDENT SUBMISSION & SECURITY VERIFICATION
+# ==============================================================================
+
+def test_phase7_3_public_projects_privacy_no_sensitive_metadata():
+    """Public project endpoint must not expose emails, phones, or private student contacts."""
+    res = client.get("/v1/projects/oct-vision-ai-campus")
+    assert res.status_code == 200
+    p = res.json()["data"]
+
+    # Verify no private data leaked in members list
+    for m in p.get("members", []):
+        assert "email" not in m
+        assert "phone" not in m
+        assert "student_phone" not in m
+        assert "student_email" not in m
+        # Publicly safe fields
+        assert "student_full_name" in m
+        assert "role" in m
+
+
+def test_phase7_3_public_projects_hides_draft_and_internal_ideas():
+    """Unpublished/draft or internal idea projects must return 404 to public callers."""
+    res = client.get("/v1/projects/club-neural-hardware-farm")
+    assert res.status_code == 404
+    assert res.json()["error"]["code"] == "NOT_FOUND"
+
+
+def test_phase7_3_student_project_submission_and_lead_assignment():
+    """Student can propose a project via submission flow, assigned LEAD, defaults to moderation queue."""
+    payload = {
+        "title": "Edge Speech Recognition Engine",
+        "summary": "Lightweight offline speech-to-text on Raspberry Pi 5.",
+        "description": "### Problem Statement\nSpeech models require cloud API connections.\n\n### Proposed Solution & Architecture\nWhisper-tiny quantized with CTranslate2.",
+        "technology_stack": ["Python", "Whisper", "CTranslate2"],
+        "repository_url": "https://github.com/aimlcluboct/edge-speech",
+        "visibility": "PUBLIC",
+    }
+    res = client.post("/v1/projects", json=payload, headers=STUDENT_HEADERS)
+    assert res.status_code == 201
+    created = res.json()["data"]
+    assert created["title"] == "Edge Speech Recognition Engine"
+    assert created["status"] in ("IDEA", "IN_DEVELOPMENT")
+    # Verify creator is designated as LEAD
+    assert len(created["members"]) >= 1
+    assert created["members"][0]["role"] == "LEAD"
+
+
+def test_phase7_3_student_cannot_directly_publish_project():
+    """Students cannot bypass editorial review or publish projects directly."""
+    # Attempting to call publish endpoint with student token returns 403
+    p1_id = "00000000-0000-0000-0000-000000000901"
+    res = client.post(f"/v1/projects/{p1_id}/publish", headers=STUDENT_HEADERS)
+    assert res.status_code == 403
+    assert res.json()["error"]["code"] == "PERMISSION_DENIED"
+
+
+def test_phase7_3_student_cannot_modify_unowned_project_idor():
+    """Students cannot modify a project they do not own or lead (IDOR guard)."""
+    # Project 901 is owned/led by Aman Sharma (account 001)
+    # Student token (account 008) attempts to modify Project 901
+    res = client.patch(
+        "/v1/projects/00000000-0000-0000-0000-000000000901",
+        json={"title": "Hijacked Project Title"},
+        headers=STUDENT_HEADERS,
+    )
+    assert res.status_code == 403
+    assert res.json()["error"]["code"] == "PERMISSION_DENIED"
+
+
+def test_phase7_3_public_research_draft_isolation_and_author_privacy():
+    """Public research archive excludes draft items and protects author private metadata."""
+    # 1. Draft research 'federated-learning-student-assessment' is excluded from public list
+    list_res = client.get("/v1/research")
+    assert list_res.status_code == 200
+    for item in list_res.json()["data"]:
+        assert item["status"] == "PUBLISHED"
+        assert item["visibility"] == "PUBLIC"
+        assert item["slug"] != "federated-learning-student-assessment"
+
+    # 2. Direct slug access to draft research returns 404 for public callers
+    slug_res = client.get("/v1/research/federated-learning-student-assessment")
+    assert slug_res.status_code == 404
+
+    # 3. Published research does not expose author phone/email
+    pub_res = client.get("/v1/research/edge-transformer-architectures-oct")
+    assert pub_res.status_code == 200
+    authors = pub_res.json()["data"]["authors"]
+    for a in authors:
+        assert "email" not in a
+        assert "phone" not in a
+
+
+def test_phase7_3_command_palette_search_queries():
+    """Command palette search query against /v1/search returns multi-domain results with proper metadata."""
+    res = client.get("/v1/search?q=vision&limit=10")
+    assert res.status_code == 200
+    data = res.json()["data"]
+    assert isinstance(data, list)
+    assert len(data) >= 1
+
+    # Verify result structure conforms to SearchResultItem
+    for item in data:
+        assert "id" in item
+        assert "entity_type" in item
+        assert "title" in item
+        assert "url" in item
+        assert item["url"].startswith("/")
+
+
+
 

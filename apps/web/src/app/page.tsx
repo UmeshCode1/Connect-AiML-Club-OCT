@@ -43,13 +43,20 @@ export default function HomePage() {
             <a href="/events">
               <Button variant="primary">Explore Events</Button>
             </a>
+            <a href="/projects">
+              <Button variant="secondary" style={{ backgroundColor: '#00763C', color: '#FFF' }}>
+                AI Projects
+              </Button>
+            </a>
             <a href="/verify/smoke-check">
               <Button variant="outline" style={{ borderColor: '#64748B', color: '#F8FAFC' }}>
                 Verify Certificate
               </Button>
             </a>
             <a href="/auth">
-              <Button variant="secondary">Member Portal</Button>
+              <Button variant="ghost" style={{ color: '#E2E8F0', border: '1px solid #334155' }}>
+                Member Portal
+              </Button>
             </a>
           </div>
         </div>
@@ -81,6 +88,71 @@ export default function HomePage() {
             height={120}
             style={{ objectFit: 'contain' }}
           />
+        </div>
+      </section>
+
+      {/* Knowledge & Innovation Showcase Hub */}
+      <section style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+        <div>
+          <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#00763C', letterSpacing: '0.05em', textTransform: 'uppercase' }}>
+            KNOWLEDGE &amp; ACADEMIC HUB
+          </span>
+          <h2 style={{ fontSize: '1.5rem', fontWeight: 800, color: '#014B7A', marginTop: '2px' }}>
+            Institutional Showcase &amp; Open Resources
+          </h2>
+        </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px' }}>
+          <Card elevated style={{ borderLeft: '4px solid #014B7A', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+            <div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                <h3 style={{ fontSize: '1.125rem', fontWeight: 700, color: '#014B7A' }}>Applied Projects</h3>
+                <StatusPill label="Showcase" variant="info" />
+              </div>
+              <p style={{ fontSize: '0.875rem', color: '#475569', lineHeight: 1.5 }}>
+                Real-world intelligent campus systems, computer vision edge nodes, and student hackathon deliverables with verified team attribution.
+              </p>
+            </div>
+            <div style={{ marginTop: '16px' }}>
+              <a href="/projects" style={{ textDecoration: 'none' }}>
+                <Button variant="outline" size="sm">Explore Projects →</Button>
+              </a>
+            </div>
+          </Card>
+
+          <Card elevated style={{ borderLeft: '4px solid #00763C', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+            <div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                <h3 style={{ fontSize: '1.125rem', fontWeight: 700, color: '#00763C' }}>Research Pre-prints</h3>
+                <StatusPill label="Academic" variant="success" />
+              </div>
+              <p style={{ fontSize: '0.875rem', color: '#475569', lineHeight: 1.5 }}>
+                Peer-reviewed conference papers, lightweight transformer benchmarks, and faculty-mentored machine learning studies from OCT Bhopal.
+              </p>
+            </div>
+            <div style={{ marginTop: '16px' }}>
+              <a href="/research" style={{ textDecoration: 'none' }}>
+                <Button variant="outline" size="sm">Browse Research →</Button>
+              </a>
+            </div>
+          </Card>
+
+          <Card elevated style={{ borderLeft: '4px solid #D97706', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+            <div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                <h3 style={{ fontSize: '1.125rem', fontWeight: 700, color: '#D97706' }}>Learning Resources</h3>
+                <StatusPill label="Open Access" variant="warning" />
+              </div>
+              <p style={{ fontSize: '0.875rem', color: '#475569', lineHeight: 1.5 }}>
+                Curated PyTorch Google Colab notebooks, workshop slide presentations, and hands-on lab code accompanying club symposiums.
+              </p>
+            </div>
+            <div style={{ marginTop: '16px' }}>
+              <a href="/learning" style={{ textDecoration: 'none' }}>
+                <Button variant="outline" size="sm">Access Labs →</Button>
+              </a>
+            </div>
+          </Card>
         </div>
       </section>
 
