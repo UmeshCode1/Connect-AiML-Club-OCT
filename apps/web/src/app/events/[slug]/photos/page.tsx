@@ -2,7 +2,7 @@
 
 import React, { useState, use } from 'react';
 import Link from 'next/link';
-import { Card, StatusPill, Button } from '@connect/ui';
+import { Card, StatusPill, Button, EmptyState } from '@connect/ui';
 
 interface MatchedPhoto {
   id: string;
@@ -186,12 +186,10 @@ export default function StudentPhotoDiscoveryPage({
             {searched && (
               <div>
                 {matches.length === 0 ? (
-                  <div style={{ padding: '32px', textAlign: 'center', backgroundColor: '#F8FAFC', borderRadius: '8px', color: '#64748B' }}>
-                    <p style={{ fontWeight: 600 }}>No matching photos found in this event.</p>
-                    <p style={{ fontSize: '0.85rem', marginTop: '4px' }}>
-                      More media is uploaded and processed following event conclusion.
-                    </p>
-                  </div>
+                  <EmptyState
+                    title="No matching photos found in this event"
+                    description="Personal media is cataloged and facial embedding models are indexed following event conclusion. Check back shortly."
+                  />
                 ) : (
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px' }}>
                     {matches.map((photo) => (

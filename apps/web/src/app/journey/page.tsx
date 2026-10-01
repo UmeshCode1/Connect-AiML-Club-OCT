@@ -38,7 +38,7 @@ export default async function JourneyTimelinePage() {
   const milestones = await getMilestones();
 
   return (
-    <div style={{ maxWidth: '950px', margin: '0 auto', padding: '40px 20px' }}>
+    <div style={{ maxWidth: '950px', margin: '0 auto', padding: '8px 0 32px 0' }}>
       {/* Header */}
       <div style={{
         borderBottom: '2px solid #E2E8F0',

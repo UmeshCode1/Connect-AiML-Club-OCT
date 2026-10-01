@@ -3,7 +3,7 @@
 import React, { useState, useMemo } from 'react';
 import Link from 'next/link';
 import type { LearningResource, LearningResourceType, LearningDifficultyLevel } from '@connect/types';
-import { Card, Button, StatusPill } from '@connect/ui';
+import { Card, Button, StatusPill, EmptyState } from '@connect/ui';
 
 interface LearningClientProps {
   initialResources: LearningResource[];
@@ -215,34 +215,18 @@ export default function LearningClient({ initialResources }: LearningClientProps
 
       {/* Resources Grid */}
       {filteredResources.length === 0 ? (
-        <div
-          style={{
-            padding: '48px 24px',
-            textAlign: 'center',
-            backgroundColor: '#FFFFFF',
-            borderRadius: '12px',
-            border: '1px solid #E2E8F0',
+        <EmptyState
+          title="No learning resources found"
+          description="No workshop materials match your current filter combination. Try clearing filters or selecting another format."
+          actionText="Clear All Filters"
+          onAction={() => {
+            setSearch('');
+            setSelectedType('ALL');
+            setSelectedDifficulty('ALL');
           }}
-        >
-          <p style={{ fontWeight: 700, color: '#1E293B', fontSize: '1.125rem' }}>No learning resources found</p>
-          <p style={{ fontSize: '0.875rem', color: '#64748B', marginTop: '4px' }}>
-            No workshop materials match your current filter combination.
-          </p>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => {
-              setSearch('');
-              setSelectedType('ALL');
-              setSelectedDifficulty('ALL');
-            }}
-            style={{ marginTop: '16px' }}
-          >
-            Clear Filters
-          </Button>
-        </div>
+        />
       ) : (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(310px, 1fr))', gap: '20px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '20px' }}>
           {filteredResources.map((res) => (
             <Card
               key={res.id}

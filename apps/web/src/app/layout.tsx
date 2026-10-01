@@ -57,16 +57,7 @@ export default function RootLayout({
         <link rel="icon" href="/brand/aiml-club-mark-101.png" type="image/png" />
       </head>
       <body>
-        <header
-          style={{
-            borderBottom: '1px solid var(--color-border, #E5EAF0)',
-            backgroundColor: 'var(--color-surface-white, #FFFFFF)',
-            padding: '12px 24px',
-            position: 'sticky',
-            top: 0,
-            zIndex: 50,
-          }}
-        >
+        <header className="site-header">
           <div
             style={{
               maxWidth: '1280px',
@@ -74,6 +65,7 @@ export default function RootLayout({
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
+              gap: '12px',
             }}
           >
             <BrandHeader showTagline={true} />
@@ -81,22 +73,13 @@ export default function RootLayout({
           </div>
         </header>
 
-        <main style={{ minHeight: 'calc(100vh - 140px)', padding: '24px' }}>
+        <main className="site-main">
           <div style={{ maxWidth: '1280px', margin: '0 auto' }}>
             {children}
           </div>
         </main>
 
-        <footer
-          style={{
-            borderTop: '1px solid var(--color-border, #E5EAF0)',
-            backgroundColor: 'var(--color-surface-white, #FFFFFF)',
-            padding: '24px',
-            textAlign: 'center',
-            fontSize: '0.875rem',
-            color: 'var(--color-text-secondary, #5B6573)',
-          }}
-        >
+        <footer className="site-footer">
           <div style={{ maxWidth: '1280px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '8px' }}>
             <p style={{ fontWeight: 600, color: 'var(--color-brand-primary, #014B7A)' }}>
               {BRAND.organization}
@@ -109,7 +92,7 @@ export default function RootLayout({
               | Subdomain Ecosystem: {BRAND.appDomain} • {BRAND.adminDomain} • {BRAND.apiDomain}
             </p>
             <p style={{ fontSize: '0.75rem', color: 'var(--color-text-muted, #8A95A3)' }}>
-              &copy; {new Date().getFullYear()} AIML Club OCT. All rights reserved. Official Tagline: &ldquo;{BRAND.tagline}&rdquo;
+              &copy; 2026 AIML Club OCT. All rights reserved. Official Tagline: &ldquo;{BRAND.tagline}&rdquo;
             </p>
           </div>
         </footer>

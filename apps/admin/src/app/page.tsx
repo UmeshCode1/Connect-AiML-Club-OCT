@@ -158,7 +158,7 @@ export default function AdminDashboardPage() {
       </div>
 
       {/* Dual Queue Layout: Active Events & Submissions Awaiting Action */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))', gap: '24px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '24px' }}>
         {/* Active Events Roster */}
         <Card style={{ backgroundColor: '#111820', borderColor: '#1E293B', color: '#FFFFFF', padding: '24px' }}>
           <div

@@ -38,7 +38,7 @@ export default async function ChronicleIndexPage() {
   const entries = await getChronicles();
 
   return (
-    <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '40px 20px' }}>
+    <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '8px 0 32px 0' }}>
       {/* Header Banner */}
       <div style={{
         borderBottom: '2px solid #E2E8F0',
@@ -90,7 +90,7 @@ export default async function ChronicleIndexPage() {
       ) : (
         <div style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))',
+          gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
           gap: '30px',
         }}>
           {entries.map((entry) => (

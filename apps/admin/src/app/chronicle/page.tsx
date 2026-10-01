@@ -50,23 +50,9 @@ export default function ChronicleAdminPage() {
         const data = await res.json();
         setEntries(data.data || []);
       }
-    } catch {
-      // Fallback sample data if API server is offline during build
-      setEntries([
-        {
-          id: '00000000-0000-0000-0000-000000000701',
-          title: 'Welcome to AIML Club Chronicle: Academic Year 2026',
-          slug: 'welcome-to-aiml-club-chronicle-2026',
-          edition_type: 'INSTITUTIONAL_ANNOUNCEMENT',
-          excerpt: 'Official inaugurative edition of AIML CLUB OCT Chronicle covering key milestones, upcoming symposiums, and student research tracks.',
-          content: '# Welcome to AIML Club Chronicle\n\nInnovate. Implement. Inspire.\n\nWe are pleased to introduce the official digital chronicle of AIML CLUB OCT.',
-          visibility: 'PUBLIC',
-          status: 'PUBLISHED',
-          published_at: '2026-03-01T10:00:00Z',
-          created_at: '2026-03-01T09:00:00Z',
-          updated_at: '2026-03-01T10:00:00Z',
-        },
-      ]);
+    } catch (err) {
+      console.error('Failed to fetch chronicle entries from API:', err);
+      setEntries([]);
     } finally {
       setLoading(false);
     }

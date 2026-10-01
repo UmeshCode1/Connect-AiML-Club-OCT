@@ -50,34 +50,10 @@ export default function EventFeedbackPage() {
           setSummary(sumJson.data);
         }
       }
-    } catch {
-      // Offline fallback
-      setEventData({
-        id: '00000000-0000-0000-0000-000000000101',
-        title: 'Aptify 2.0: AI Symposium',
-        slug: 'aptify-2026',
-      });
-      setPublicFeedbacks([
-        {
-          id: '00000000-0000-0000-0000-000000000901',
-          event_id: '00000000-0000-0000-0000-000000000101',
-          rating: 5,
-          feedback_text: 'The computer vision hands-on session was exceptionally structured and practical!',
-          suggestion_text: 'Would love an advanced multi-modal agent track in the next workshop.',
-          author_name: 'Aarav Sharma',
-          is_anonymous: false,
-          created_at: '2026-03-01T17:00:00Z',
-        },
-      ]);
-      setSummary({
-        event_id: '00000000-0000-0000-0000-000000000101',
-        total_feedback: 1,
-        average_rating: 5.0,
-        rating_distribution: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 1 },
-        pending_moderation_count: 0,
-        approved_count: 1,
-        rejected_count: 0,
-      });
+    } catch (err) {
+      console.error('Failed to load event feedback data:', err);
+      setPublicFeedbacks([]);
+      setSummary(null);
     } finally {
       setLoading(false);
     }

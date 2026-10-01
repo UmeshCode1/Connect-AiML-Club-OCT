@@ -175,19 +175,54 @@ export default function PublicEventDetailPage({ params }: { params: Promise<{ sl
             </h2>
             <p style={{ fontSize: '0.9rem', color: '#64748B', marginTop: '4px' }}>
               Open to students of Oriental College of Technology (OCT) and affiliated institutions.
-              Already registered?{' '}
-              <Link href={`/events/${event.slug}/pass`} style={{ color: 'var(--color-brand-primary, #014B7A)', fontWeight: 600, textDecoration: 'underline' }}>
-                Access your Digital Attendance Pass →
-              </Link>{' '}
-              •{' '}
-              <Link href={`/events/${event.slug}/photos`} style={{ color: 'var(--color-brand-primary, #014B7A)', fontWeight: 600, textDecoration: 'underline' }}>
-                Discover Event Photos →
-              </Link>{' '}
-              •{' '}
-              <Link href={`/events/${event.slug}/feedback`} style={{ color: '#00763C', fontWeight: 600, textDecoration: 'underline' }}>
-                Submit / View Feedback →
-              </Link>
             </p>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginTop: '10px' }}>
+              <Link
+                href={`/events/${event.slug}/pass`}
+                style={{
+                  fontSize: '0.8125rem',
+                  fontWeight: 600,
+                  color: '#014B7A',
+                  backgroundColor: '#EFF6FB',
+                  border: '1px solid #BAE6FD',
+                  padding: '4px 10px',
+                  borderRadius: '6px',
+                  textDecoration: 'none',
+                }}
+              >
+                🎟️ Digital Attendance Pass →
+              </Link>
+              <Link
+                href={`/events/${event.slug}/photos`}
+                style={{
+                  fontSize: '0.8125rem',
+                  fontWeight: 600,
+                  color: '#014B7A',
+                  backgroundColor: '#EFF6FB',
+                  border: '1px solid #BAE6FD',
+                  padding: '4px 10px',
+                  borderRadius: '6px',
+                  textDecoration: 'none',
+                }}
+              >
+                📸 Discover Photos →
+              </Link>
+              <Link
+                href={`/events/${event.slug}/feedback`}
+                style={{
+                  fontSize: '0.8125rem',
+                  fontWeight: 600,
+                  color: '#00763C',
+                  backgroundColor: '#ECFDF5',
+                  border: '1px solid #A7F3D0',
+                  padding: '4px 10px',
+                  borderRadius: '6px',
+                  textDecoration: 'none',
+                }}
+              >
+                💬 Feedback Portal →
+              </Link>
+            </div>
           </div>
 
           {!event.registration_open ? (

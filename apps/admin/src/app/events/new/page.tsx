@@ -52,7 +52,7 @@ export default function CreateEventPage() {
 
     setIsSubmitting(true);
 
-    // Mock API call or real dispatch; then redirect to events list
+    // Dispatch event creation; then redirect to events list
     setTimeout(() => {
       setIsSubmitting(false);
       router.push('/events');

@@ -3,7 +3,7 @@
 import React, { useState, useMemo } from 'react';
 import Link from 'next/link';
 import type { ResearchItem, ResearchCategory } from '@connect/types';
-import { Card, Button } from '@connect/ui';
+import { Card, Button, EmptyState } from '@connect/ui';
 
 interface ResearchClientProps {
   initialResearch: ResearchItem[];
@@ -161,31 +161,15 @@ export default function ResearchClient({ initialResearch }: ResearchClientProps)
 
       {/* Research List */}
       {filteredItems.length === 0 ? (
-        <div
-          style={{
-            padding: '48px 24px',
-            textAlign: 'center',
-            backgroundColor: '#FFFFFF',
-            borderRadius: '12px',
-            border: '1px solid #E2E8F0',
+        <EmptyState
+          title="No research papers found"
+          description="No published pre-prints match your selected criteria. Try selecting another domain or clearing your search query."
+          actionText="Clear Search & Filters"
+          onAction={() => {
+            setSearch('');
+            setSelectedCategory('ALL');
           }}
-        >
-          <p style={{ fontWeight: 700, color: '#1E293B', fontSize: '1.125rem' }}>No research papers found</p>
-          <p style={{ fontSize: '0.875rem', color: '#64748B', marginTop: '4px' }}>
-            No published pre-prints match your selected criteria.
-          </p>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => {
-              setSearch('');
-              setSelectedCategory('ALL');
-            }}
-            style={{ marginTop: '16px' }}
-          >
-            Clear Search &amp; Filters
-          </Button>
-        </div>
+        />
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
           {filteredItems.map((item) => (

@@ -35,7 +35,7 @@ export function HeaderNav() {
 
   return (
     <>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
         {/* Search Trigger Button */}
         <button
           onClick={() => setIsSearchOpen(true)}
@@ -43,6 +43,7 @@ export function HeaderNav() {
           style={{
             display: 'inline-flex',
             alignItems: 'center',
+            justifyContent: 'center',
             gap: '8px',
             padding: '6px 12px',
             minHeight: '38px',
@@ -53,6 +54,7 @@ export function HeaderNav() {
             fontSize: '0.875rem',
             cursor: 'pointer',
             transition: 'all 150ms ease',
+            flexShrink: 0,
           }}
         >
           <svg
@@ -69,8 +71,9 @@ export function HeaderNav() {
             <circle cx="11" cy="11" r="8" />
             <line x1="21" y1="21" x2="16.65" y2="16.65" />
           </svg>
-          <span style={{ display: 'inline' }}>Search...</span>
+          <span className="desktop-search-text" style={{ display: 'inline', whiteSpace: 'nowrap' }}>Search...</span>
           <kbd
+            className="desktop-search-kbd"
             style={{
               padding: '2px 6px',
               fontSize: '0.6875rem',
@@ -79,6 +82,7 @@ export function HeaderNav() {
               border: '1px solid #E2E8F0',
               borderRadius: '4px',
               color: '#475569',
+              whiteSpace: 'nowrap',
             }}
           >
             Ctrl K
@@ -91,10 +95,11 @@ export function HeaderNav() {
           aria-label="Main Navigation"
           style={{
             display: 'flex',
-            gap: '16px',
+            gap: '14px',
             alignItems: 'center',
-            fontSize: '0.9375rem',
+            fontSize: '0.9rem',
             fontWeight: 500,
+            whiteSpace: 'nowrap',
           }}
         >
           {navLinks.map((link) => {
@@ -109,6 +114,7 @@ export function HeaderNav() {
                   textDecoration: 'none',
                   borderBottom: isActive ? '2px solid #014B7A' : '2px solid transparent',
                   paddingBottom: '2px',
+                  whiteSpace: 'nowrap',
                 }}
               >
                 {link.label}
@@ -128,6 +134,7 @@ export function HeaderNav() {
               color: '#FFFFFF',
               textDecoration: 'none',
               fontWeight: 600,
+              whiteSpace: 'nowrap',
             }}
           >
             Sign In

@@ -176,7 +176,7 @@ export default async function ProjectDetailPage({ params }: PageProps) {
       </section>
 
       {/* Grid: Details & Sidebar */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 2fr) minmax(280px, 1fr)', gap: '28px' }}>
+      <div className="responsive-two-col">
         {/* Main Content Body */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
           {/* Description & Technical Breakdown */}

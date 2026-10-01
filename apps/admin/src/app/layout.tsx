@@ -2,6 +2,8 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import './globals.css';
 
+import { AdminNav } from './components/AdminNav';
+
 export const metadata: Metadata = {
   title: 'AIML CLUB OCT — Admin Console',
   description: 'Operational and event administration portal for AIML Club OCT.',
@@ -31,7 +33,7 @@ export default function RootLayout({
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
             <Link href="/" style={{ textDecoration: 'none', color: 'inherit', display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <span style={{ fontWeight: 800, fontSize: '1.1rem', color: '#014B7A', letterSpacing: '-0.02em' }}>
+              <span style={{ fontWeight: 800, fontSize: '1.1rem', color: '#014B7A', letterSpacing: '-0.02em', whiteSpace: 'nowrap' }}>
                 AIML CLUB OCT <span style={{ color: '#94A3B8', fontWeight: 500 }}>| ADMIN</span>
               </span>
             </Link>
@@ -42,46 +44,14 @@ export default function RootLayout({
               fontSize: '0.75rem',
               fontWeight: 700,
               padding: '2px 8px',
-              borderRadius: '4px'
+              borderRadius: '4px',
+              whiteSpace: 'nowrap',
             }}>
               PORTAL v1.1
             </span>
           </div>
 
-          <nav style={{ display: 'flex', alignItems: 'center', gap: '16px', flexWrap: 'wrap' }}>
-            <Link href="/" style={{ color: '#E2E8F0', fontSize: '0.875rem', fontWeight: 500 }}>
-              Overview
-            </Link>
-            <Link href="/events" style={{ color: '#E2E8F0', fontSize: '0.875rem', fontWeight: 500 }}>
-              Events
-            </Link>
-            <Link href="/projects" style={{ color: '#38BDF8', fontSize: '0.875rem', fontWeight: 600 }}>
-              Projects
-            </Link>
-            <Link href="/research" style={{ color: '#38BDF8', fontSize: '0.875rem', fontWeight: 600 }}>
-              Research
-            </Link>
-            <Link href="/learning" style={{ color: '#38BDF8', fontSize: '0.875rem', fontWeight: 600 }}>
-              Learning
-            </Link>
-            <Link href="/chronicle" style={{ color: '#E2E8F0', fontSize: '0.875rem', fontWeight: 500 }}>
-              Chronicle
-            </Link>
-            <Link href="/journey" style={{ color: '#E2E8F0', fontSize: '0.875rem', fontWeight: 500 }}>
-              Journey
-            </Link>
-            <Link href="/events/new" style={{
-              backgroundColor: '#014B7A',
-              color: '#FFFFFF',
-              padding: '6px 14px',
-              borderRadius: '6px',
-              fontSize: '0.8125rem',
-              fontWeight: 600,
-              textDecoration: 'none'
-            }}>
-              + Create Event
-            </Link>
-          </nav>
+          <AdminNav />
         </header>
 
         <main style={{ flex: 1, padding: '32px 24px', maxWidth: '1200px', width: '100%', margin: '0 auto' }}>

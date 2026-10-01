@@ -1282,22 +1282,23 @@ export const BrandHeader: React.FC<BrandHeaderProps> = ({ showTagline = true, th
   const isDark = theme === 'dark';
 
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', minWidth: 0 }}>
       <img
         src="/brand/aiml-club-mark-101.png"
         alt="AIML Club OCT Logo"
         width={38}
         height={38}
-        style={{ borderRadius: '50%', objectFit: 'contain' }}
+        style={{ borderRadius: '50%', objectFit: 'contain', flexShrink: 0 }}
       />
-      <div>
+      <div style={{ minWidth: 0 }}>
         <div
           style={{
             fontWeight: 800,
-            fontSize: '1.125rem',
+            fontSize: '1.0625rem',
             color: isDark ? '#FFFFFF' : 'var(--color-brand-primary, #014B7A)',
             lineHeight: 1.2,
             letterSpacing: '-0.02em',
+            whiteSpace: 'nowrap',
           }}
         >
           AIML CLUB OCT{' '}
@@ -1317,6 +1318,9 @@ export const BrandHeader: React.FC<BrandHeaderProps> = ({ showTagline = true, th
               color: isDark ? '#94A3B8' : 'var(--color-brand-secondary, #00763C)',
               fontWeight: 600,
               letterSpacing: '0.04em',
+              whiteSpace: 'nowrap',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
             }}
           >
             Innovate. Implement. Inspire.

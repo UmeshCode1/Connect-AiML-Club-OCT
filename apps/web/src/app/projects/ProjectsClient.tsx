@@ -3,7 +3,7 @@
 import React, { useState, useMemo } from 'react';
 import Link from 'next/link';
 import type { Project } from '@connect/types';
-import { Card, StatusPill, Button } from '@connect/ui';
+import { Card, StatusPill, Button, EmptyState } from '@connect/ui';
 
 interface ProjectsClientProps {
   initialProjects: Project[];
@@ -193,43 +193,18 @@ export default function ProjectsClient({ initialProjects }: ProjectsClientProps)
 
       {/* Projects Grid */}
       {filteredProjects.length === 0 ? (
-        <div
-          style={{
-            padding: '64px 24px',
-            textAlign: 'center',
-            backgroundColor: '#FFFFFF',
-            borderRadius: '12px',
-            border: '1px solid #E2E8F0',
+        <EmptyState
+          title="No projects match your filter"
+          description="Try clearing your search query or switching your status filter to explore more student deliverables."
+          actionText="Reset All Filters"
+          onAction={() => {
+            setSearch('');
+            setStatusFilter('ALL');
+            setFeaturedOnly(false);
           }}
-        >
-          <div style={{ fontSize: '2rem', marginBottom: '8px' }}>🔍</div>
-          <h3 style={{ fontSize: '1.125rem', fontWeight: 700, color: '#1E293B' }}>No projects match your filter</h3>
-          <p style={{ fontSize: '0.875rem', color: '#64748B', marginTop: '4px' }}>
-            Try clearing your search query or switching your status filter.
-          </p>
-          <button
-            onClick={() => {
-              setSearch('');
-              setStatusFilter('ALL');
-              setFeaturedOnly(false);
-            }}
-            style={{
-              marginTop: '16px',
-              padding: '6px 14px',
-              borderRadius: '6px',
-              border: '1px solid #CBD5E1',
-              backgroundColor: '#F8FAFC',
-              color: '#014B7A',
-              fontWeight: 600,
-              fontSize: '0.875rem',
-              cursor: 'pointer',
-            }}
-          >
-            Reset All Filters
-          </button>
-        </div>
+        />
       ) : (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '24px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '24px' }}>
           {filteredProjects.map((project) => (
             <Card
               key={project.id}

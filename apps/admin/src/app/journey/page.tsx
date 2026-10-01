@@ -43,24 +43,9 @@ export default function JourneyAdminPage() {
         const data = await res.json();
         setMilestones(data.data || []);
       }
-    } catch {
-      // Sample fallback if API is not running during build
-      setMilestones([
-        {
-          id: '00000000-0000-0000-0000-000000000801',
-          title: 'Foundation of AI & ML Club, Oriental College of Technology',
-          slug: 'foundation-of-aiml-club-oct',
-          milestone_date: '2024-08-15',
-          milestone_type: 'FOUNDATION',
-          description: 'Establishment of the dedicated AI & Machine Learning student chapter at Oriental College of Technology, Bhopal under the leadership of student coordinators and institutional faculty advisors.',
-          visibility: 'PUBLIC',
-          status: 'PUBLISHED',
-          display_order: 0,
-          published_at: '2024-08-15T12:00:00Z',
-          created_at: '2024-08-15T12:00:00Z',
-          updated_at: '2024-08-15T12:00:00Z',
-        },
-      ]);
+    } catch (err) {
+      console.error('Failed to fetch milestones from API:', err);
+      setMilestones([]);
     } finally {
       setLoading(false);
     }
