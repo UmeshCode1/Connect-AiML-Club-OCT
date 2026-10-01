@@ -73,3 +73,6 @@ pnpm-debug.log*
 # Supabase CLI temp cache
 supabase/.temp/
 .temp/
+
+# Playwright MCP temp files
+.playwright-mcp/
