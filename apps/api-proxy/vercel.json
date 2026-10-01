@@ -1,0 +1,9 @@
+{
+  "version": 2,
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "https://aca-connect-api.agreeablesand-79215911.centralindia.azurecontainerapps.io/$1"
+    }
+  ]
+}
