@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { Card, Button, StatusPill } from '@connect/ui';
-import { supabase } from '@/lib/supabase';
+import { supabase } from '../../lib/supabase';
 
 export default function AuthPage() {
   const [email, setEmail] = useState('');
