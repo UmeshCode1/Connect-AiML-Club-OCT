@@ -1,0 +1,1 @@
+# AIML CLUB OCT — CONNECT Workers

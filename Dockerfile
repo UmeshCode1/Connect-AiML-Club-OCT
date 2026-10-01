@@ -33,6 +33,7 @@ COPY --from=builder /opt/venv /opt/venv
 # Copy API application source
 COPY apps/api/src ./apps/api/src
 COPY apps/api/pyproject.toml ./apps/api/
+COPY workers ./workers
 
 ENV PATH="/opt/venv/bin:$PATH" \
     PYTHONPATH=/app \
